@@ -1,6 +1,6 @@
 // Steady service worker: caches the app so it opens offline.
 // Network-first for same-origin files (so updates arrive), cache as fallback.
-const CACHE = 'steady-v3';
+const CACHE = 'steady-v4';
 const ASSETS = [
   './', './index.html', './manifest.webmanifest', './vendor/qrcode.js',
   './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png',

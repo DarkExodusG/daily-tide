@@ -467,7 +467,9 @@ function ask(title,body,ok='Confirm',danger=false){return new Promise(res=>{
 const live=()=>D.entries;
 const slips=()=>D.entries.filter(e=>e.outcome==='slipped').map(e=>e.ts).sort((a,b)=>a-b);
 function streakStart(){const sl=slips().filter(t=>t>=D.start);return sl.length?sl[sl.length-1]:D.start;}
-const days=(a,b)=>Math.max(0,Math.floor((b-a)/DAY));
+/* calendar days between two moments: a slip at 11pm counts as day 1 the next morning */
+const midnight=t=>{const d=new Date(t);d.setHours(0,0,0,0);return d.getTime();};
+const days=(a,b)=>Math.max(0,Math.round((midnight(b)-midnight(a))/DAY));
 const currentStreak=()=>days(streakStart(),Date.now());
 function pastStreaks(){const p=[D.start,...slips().filter(t=>t>=D.start)];const out=[];for(let i=1;i<p.length;i++)out.push(days(p[i-1],p[i]));return out;}
 const bestStreak=()=>Math.max(currentStreak(),...pastStreaks(),0);
