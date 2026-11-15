@@ -1,0 +1,1082 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<title>Steady</title>
+<meta name="description" content="A private place to ride out urges.">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#E8F0EE">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0B1A1F">
+<meta name="color-scheme" content="light dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Steady">
+<meta name="robots" content="noindex">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+:root{
+  --bg:#E8F0EE; --bg-2:#F6FAF9; --bg-3:#FFFFFF; --line:#CCDCD8; --line-2:#B4CAC5;
+  --ink:#0F2A30; --ink-2:#34525A; --ink-3:#4F6C71;
+  --sea:#0F7A65; --sea-hi:#0B6654; --sea-ink:#FFFFFF; --sea-soft:rgba(15,122,101,.11); --sea-mid:rgba(15,122,101,.32);
+  --ember:#A9561F; --ember-soft:rgba(169,86,31,.11); --ember-mid:rgba(169,86,31,.34);
+  --shadow:0 1px 2px rgba(15,42,48,.06),0 10px 30px -12px rgba(15,42,48,.18);
+  --r:20px; --r-sm:12px;
+  --font:"Segoe UI Variable Text","Segoe UI",-apple-system,BlinkMacSystemFont,"SF Pro Text",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-d:"Segoe UI Variable Display","Segoe UI",-apple-system,BlinkMacSystemFont,"SF Pro Display",Roboto,"Helvetica Neue",sans-serif;
+  --ease:cubic-bezier(.16,1,.3,1);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1A1F; --bg-2:#10242A; --bg-3:#152E35; --line:#1E3B43; --line-2:#2A4C55;
+    --ink:#E4EEEC; --ink-2:#A9C0C1; --ink-3:#86A1A4;
+    --sea:#7ED6BD; --sea-hi:#9BE3CE; --sea-ink:#062019; --sea-soft:rgba(126,214,189,.12); --sea-mid:rgba(126,214,189,.34);
+    --ember:#F0B27A; --ember-soft:rgba(240,178,122,.12); --ember-mid:rgba(240,178,122,.36);
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 14px 40px -16px rgba(0,0,0,.6);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1A1F; --bg-2:#10242A; --bg-3:#152E35; --line:#1E3B43; --line-2:#2A4C55;
+  --ink:#E4EEEC; --ink-2:#A9C0C1; --ink-3:#86A1A4;
+  --sea:#7ED6BD; --sea-hi:#9BE3CE; --sea-ink:#062019; --sea-soft:rgba(126,214,189,.12); --sea-mid:rgba(126,214,189,.34);
+  --ember:#F0B27A; --ember-soft:rgba(240,178,122,.12); --ember-mid:rgba(240,178,122,.36);
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 14px 40px -16px rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;overscroll-behavior:none;background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--font);min-height:100dvh;font-variant-numeric:tabular-nums}
+::selection{background:var(--sea);color:var(--sea-ink)}
+input,textarea,select,button{font:inherit;color:inherit}
+input,textarea,select{font-size:16px;caret-color:var(--sea)}
+button,a,[role="button"],.chip{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+button{cursor:pointer;border:0;background:none;padding:0}
+a{color:var(--sea)}
+:focus-visible{outline:2px solid var(--sea);outline-offset:3px;border-radius:10px}
+[tabindex="-1"]:focus,[tabindex="-1"]:focus-visible{outline:none}
+*{scrollbar-width:thin;scrollbar-color:var(--line-2) transparent}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:10px;border:3px solid var(--bg)}
+svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+[hidden]{display:none!important}
+
+/* ---------- shell ---------- */
+.nav{position:fixed;inset:auto 0 0 0;z-index:20;display:grid;grid-template-columns:repeat(5,1fr);
+  background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
+.nav button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px 6px;border-radius:14px;color:var(--ink-3);font-size:11.5px;font-weight:600;letter-spacing:.01em;transition:color .2s,background .2s}
+.nav button[aria-current="page"]{color:var(--sea)}
+.nav button:active{background:var(--sea-soft)}
+.brand{display:none}
+main{max-width:640px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 24px) 20px calc(108px + env(safe-area-inset-bottom,0px))}
+@media (min-width:900px){
+  .app{display:grid;grid-template-columns:232px 1fr}
+  .nav{position:sticky;top:0;height:100dvh;inset:auto;display:flex;flex-direction:column;gap:4px;padding:28px 16px;border-top:0;border-right:1px solid var(--line);background:var(--bg-2);backdrop-filter:none}
+  .nav button{flex-direction:row;gap:12px;padding:11px 14px;font-size:15px;justify-content:flex-start}
+  .nav button[aria-current="page"]{background:var(--sea-soft)}
+  .brand{display:flex;align-items:center;gap:10px;padding:2px 14px 26px;font:650 19px/1 var(--font-d);letter-spacing:-.01em}
+  .brand svg{width:30px;height:30px}
+  main{padding:52px 40px 80px;max-width:680px}
+}
+@media (hover:hover) and (pointer:fine){
+  .nav button:hover{color:var(--ink)}
+  .nav button[aria-current="page"]:hover{color:var(--sea)}
+}
+
+/* ---------- type & atoms ---------- */
+h1,h2,h3{font-family:var(--font-d);margin:0;text-wrap:balance}
+h1{font-size:29px;line-height:1.15;font-weight:650;letter-spacing:-.02em}
+h2{font-size:20px;line-height:1.25;font-weight:650;letter-spacing:-.01em}
+h3{font-size:16.5px;font-weight:650}
+p{margin:0}
+.muted{color:var(--ink-2)}
+.faint{color:var(--ink-3);font-size:14px}
+.stack>*+*{margin-top:var(--gap,16px)}
+.section{margin-top:38px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px}
+.row{display:flex;align-items:center;gap:12px}
+.spread{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.lede{color:var(--ink-2);margin-top:6px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:14px;font-weight:650;font-size:15.5px;transition:transform .12s var(--ease),background .2s,border-color .2s,color .2s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--sea);color:var(--sea-ink)}
+.btn-ghost{border:1px solid var(--line-2);color:var(--ink)}
+.btn-quiet{color:var(--ink-2);min-height:44px;padding:0 12px}
+.btn-link{color:var(--sea);min-height:44px;padding:0;font-weight:650}
+.btn-danger{border:1px solid var(--ember-mid);color:var(--ember)}
+.btn-block{width:100%}
+.btn-lg{min-height:56px;font-size:16.5px}
+.btn[disabled]{opacity:.45;pointer-events:none}
+@media (hover:hover) and (pointer:fine){
+  .btn-primary:hover{background:var(--sea-hi)}
+  .btn-ghost:hover{border-color:var(--ink-3)}
+  .btn-quiet:hover{color:var(--ink)}
+  .btn-link:hover{text-decoration:underline;text-underline-offset:4px}
+}
+
+.panel{background:var(--bg-2);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.field{display:block}
+.field>span,.label{display:block;font-size:14px;font-weight:650;color:var(--ink-2);margin-bottom:8px}
+.input{width:100%;background:var(--bg-3);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:12px 14px;outline:none;transition:border-color .2s,box-shadow .2s}
+textarea.input{resize:vertical;min-height:96px;line-height:1.55}
+.input:focus{border-color:var(--sea);box-shadow:0 0 0 3px var(--sea-soft)}
+.input::placeholder{color:var(--ink-3)}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 15px;border-radius:999px;border:1px solid var(--line-2);background:var(--bg-3);font-size:15px;font-weight:550;color:var(--ink);transition:background .15s,border-color .15s,color .15s,transform .12s var(--ease)}
+.chip:active{transform:scale(.96)}
+.chip[aria-pressed="true"]{background:var(--sea);border-color:var(--sea);color:var(--sea-ink)}
+@media (hover:hover) and (pointer:fine){.chip:not([aria-pressed="true"]):hover{border-color:var(--ink-3)}}
+
+.seg{display:flex;padding:4px;border-radius:14px;background:var(--bg-2);border:1px solid var(--line);gap:2px}
+.seg button{flex:1;min-height:40px;padding:0 10px;border-radius:10px;font-size:14.5px;font-weight:600;color:var(--ink-2);transition:background .15s,color .15s}
+.seg button[aria-pressed="true"]{background:var(--bg-3);color:var(--ink);box-shadow:var(--shadow)}
+.seg.inline{display:inline-flex}
+.seg.inline button{flex:none;padding:0 14px}
+
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:36px;background:transparent}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:6px;background:linear-gradient(to right,var(--ember) var(--p,50%),var(--line-2) var(--p,50%))}
+input[type=range]::-moz-range-track{height:6px;border-radius:6px;background:var(--line-2)}
+input[type=range]::-moz-range-progress{height:6px;border-radius:6px;background:var(--ember)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;margin-top:-11px;border-radius:50%;background:var(--bg-3);border:2px solid var(--ember);box-shadow:var(--shadow)}
+input[type=range]::-moz-range-thumb{width:24px;height:24px;border-radius:50%;background:var(--bg-3);border:2px solid var(--ember)}
+
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:650;padding:3px 10px;border-radius:999px;background:var(--line);color:var(--ink-2)}
+.tag.sea{background:var(--sea-soft);color:var(--sea)}
+.tag.ember{background:var(--ember-soft);color:var(--ember)}
+
+/* ---------- today ---------- */
+.hello{display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--ink-2);font-size:15px;min-height:28px}
+.sync-pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-3)}
+.sync-pill i{width:7px;height:7px;border-radius:50%;background:var(--sea)}
+.sync-pill.off i{background:var(--line-2)}
+.sync-pill.err i{background:var(--ember)}
+.streak{margin-top:16px;display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.streak-n{font:650 clamp(84px,24vw,124px)/.86 var(--font-d);letter-spacing:-.045em}
+.streak-l{padding-bottom:10px}
+.streak-l b{display:block;font:650 21px/1.2 var(--font-d);letter-spacing:-.01em}
+.streak-l span{color:var(--ink-2);font-size:15px}
+.meta{display:flex;gap:26px;margin-top:20px}
+.meta div b{display:block;font:650 21px/1.1 var(--font-d)}
+.meta div span{font-size:13.5px;color:var(--ink-2)}
+
+.urge{position:relative;overflow:hidden;display:flex;align-items:center;gap:16px;width:100%;margin-top:26px;padding:22px;border-radius:24px;background:var(--sea);color:var(--sea-ink);text-align:left;box-shadow:var(--shadow);transition:transform .14s var(--ease),background .2s}
+.urge:active{transform:scale(.98)}
+.urge b{display:block;font:650 21px/1.2 var(--font-d);letter-spacing:-.01em}
+.urge .urge-sub{display:block;font-size:14.5px;opacity:.85}
+.urge .ring{flex:none;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--sea-ink) 14%,transparent)}
+.urge .ring svg{width:28px;height:28px}
+.urge-wave{display:block;position:absolute;right:-20px;bottom:-14px;width:190px;opacity:.16;pointer-events:none}
+@media (hover:hover) and (pointer:fine){.urge:hover{background:var(--sea-hi)}}
+
+.forecast{margin-top:14px;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center;padding:16px 18px;border-radius:var(--r);border:1px solid var(--line);background:var(--bg-2)}
+.meter{grid-row:span 2;display:flex;gap:3px;align-items:flex-end;height:28px}
+.meter i{width:6px;border-radius:3px;background:var(--line-2)}
+.meter i:nth-child(1){height:40%}.meter i:nth-child(2){height:70%}.meter i:nth-child(3){height:100%}
+.forecast.low .meter i:nth-child(1){background:var(--sea)}
+.forecast.medium .meter i:nth-child(-n+2){background:var(--ember)}
+.forecast.high .meter i{background:var(--ember)}
+.forecast b{font-weight:650}
+.forecast p{color:var(--ink-2);font-size:14.5px}
+.forecast.high{border-color:var(--ember-mid);background:var(--ember-soft)}
+
+.checkin{margin-top:14px}
+.ci-row{display:grid;grid-template-columns:88px 1fr;gap:8px;align-items:center;padding:5px 0}
+.ci-row .label{margin:0;font-size:14px;color:var(--ink);line-height:1.25}
+.ci-row .seg{padding:3px}
+.ci-row .seg button{min-height:38px;padding:0 4px;font-size:13.5px}
+.checkin.panel{padding:14px 16px}
+.ci-done{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ci-done p{color:var(--ink-2);font-size:14.5px}
+
+.notes{margin-top:6px}
+.note{display:grid;grid-template-columns:10px 1fr;gap:14px;padding:15px 0;border-top:1px solid var(--line)}
+.note:first-child{border-top:0;padding-top:4px}
+.note i{width:10px;height:10px;border-radius:50%;margin-top:7px;background:var(--sea)}
+.note.ember i{background:var(--ember)}
+.note b{display:block;font-weight:650;margin-bottom:3px}
+.note p{color:var(--ink-2);font-size:15px}
+.note .btn-link{margin-top:2px;min-height:36px}
+
+.reason{position:relative;padding:20px 22px 16px;border-radius:var(--r);background:var(--bg-2);border:1px solid var(--line)}
+.reason q{display:block;font:500 19px/1.45 var(--font-d);letter-spacing:-.005em;quotes:none;white-space:pre-wrap}
+.quick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+
+/* ---------- journey ---------- */
+.cal-h{display:flex;align-items:center;justify-content:space-between;margin:22px 0 10px}
+.cal-h b{font:650 18px var(--font-d)}
+.icon-btn{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;color:var(--ink-2);flex:none}
+.icon-btn:active{background:var(--line)}
+@media (hover:hover) and (pointer:fine){.icon-btn:hover{background:var(--bg-2);color:var(--ink)} .icon-btn.del:hover{color:var(--ember);background:var(--ember-soft)}}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal .dn{font-size:12px;color:var(--ink-3);text-align:center;font-weight:600;padding-bottom:4px}
+.cal .d{position:relative;aspect-ratio:1;border-radius:10px;display:grid;place-items:center;font-size:14px;font-weight:600;color:var(--ink-3);background:transparent}
+.cal .d.steady{background:var(--sea-soft);color:var(--ink)}
+.cal .d.rode{background:var(--sea-mid);color:var(--ink)}
+.cal .d.slip{background:var(--ember-mid);color:var(--ink)}
+.cal .d.today{box-shadow:inset 0 0 0 2px var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:13px;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:4px}
+.day-h{font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);margin:26px 0 4px}
+.entry{padding:14px 0;border-top:1px solid var(--line)}
+.day-h+.entry{border-top:0}
+.entry .spread{align-items:flex-start}
+.entry-t{font-weight:650}
+.entry-s{color:var(--ink-2);font-size:14.5px;margin-top:3px}
+.entry-n{margin-top:8px;font-size:15px;white-space:pre-wrap;padding-left:12px;border-left:1px solid var(--line-2)}
+.entry-n b{display:block;font-size:13px;color:var(--ink-3);font-weight:650}
+.empty{padding:36px 8px;text-align:center;color:var(--ink-2)}
+.empty svg{width:120px;height:auto;color:var(--sea);opacity:.7;margin-bottom:12px}
+
+/* ---------- insights ---------- */
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.kpis div{background:var(--bg-2);padding:16px 18px}
+.kpis b{display:block;font:650 28px/1.1 var(--font-d);letter-spacing:-.02em}
+.kpis span{font-size:13.5px;color:var(--ink-2)}
+.heat{display:grid;grid-template-columns:36px repeat(8,1fr);gap:4px;font-size:11.5px;color:var(--ink-3)}
+.heat .c{aspect-ratio:1.25;border-radius:6px;background:color-mix(in srgb,var(--ember) calc(var(--v) * 1%),var(--bg-3));border:1px solid var(--line)}
+.heat .lab{display:flex;align-items:center}
+.heat .top{text-align:center}
+.bars{display:grid;gap:14px}
+.bar-row .spread{font-size:15px;margin-bottom:6px}
+.bar-row .spread span{color:var(--ink-2);font-size:14px;text-align:right}
+.bar{height:8px;border-radius:8px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:8px;background:var(--sea);width:var(--w)}
+.bar.ember i{background:var(--ember)}
+.weeks{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;align-items:end;height:130px}
+.weeks div{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;height:100%;font-size:11.5px;color:var(--ink-3)}
+.weeks i{display:block;width:100%;max-width:34px;border-radius:8px 8px 4px 4px;background:var(--ember);opacity:.85;min-height:3px}
+.facts{display:grid;gap:0}
+.fact{padding:14px 0;border-top:1px solid var(--line)}
+.fact:first-child{border-top:0;padding-top:0}
+.fact b{display:block}
+.fact span{color:var(--ink-2);font-size:14.5px}
+
+/* ---------- reflect ---------- */
+.prompt{padding:20px 22px;border-radius:var(--r);background:var(--sea-soft)}
+.prompt .k{color:var(--sea);font-weight:650;font-size:13.5px;margin-bottom:6px}
+.prompt p{font:500 18px/1.45 var(--font-d)}
+textarea.writing{min-height:240px;font-size:17px;line-height:1.65;padding:18px}
+details.past{border-top:1px solid var(--line);padding:14px 0}
+details.past summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:12px;font-weight:600;min-height:28px}
+details.past summary::-webkit-details-marker{display:none}
+details.past summary span{color:var(--ink-3);font-weight:500;font-size:14px}
+details.past .body{margin-top:10px;white-space:pre-wrap;color:var(--ink-2);line-height:1.65}
+.plan{padding:16px 0;border-top:1px solid var(--line)}
+.plan:first-child{border-top:0;padding-top:4px}
+.plan .label{color:var(--ink)}
+
+/* ---------- settings ---------- */
+.set{padding:20px 0;border-top:1px solid var(--line)}
+.set:first-child{border-top:0;padding-top:0}
+.set .faint{margin-top:6px}
+.qr{display:grid;place-items:center;background:#fff;border-radius:16px;padding:14px;width:min(260px,100%);margin:16px auto 8px}
+.qr svg{width:100%;height:auto;display:block}
+.code{font:600 17px/1.5 ui-monospace,Consolas,monospace;letter-spacing:.06em;text-align:center;word-break:break-all;padding:12px;border-radius:12px;background:var(--bg-3);border:1px solid var(--line);-webkit-user-select:all;user-select:all}
+
+/* ---------- overlay (urge flow) ---------- */
+.layer{position:fixed;inset:0;z-index:50;background:var(--bg);overflow-y:auto;overscroll-behavior:contain;
+  padding:calc(env(safe-area-inset-top,0px) + 12px) 20px 0;animation:layerIn .38s var(--ease)}
+@keyframes layerIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.layer-in{max-width:560px;margin:0 auto;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 28px)}
+.layer-top{display:flex;justify-content:space-between;align-items:center;min-height:44px;margin-bottom:6px}
+.layer-top .faint{font-weight:650}
+svg.wave{width:100%;height:auto;display:block;overflow:visible}
+.wave-base{fill:none;stroke:var(--line-2);stroke-width:2.5;stroke-linecap:round}
+.wave-area{fill:var(--sea-soft)}
+.wave-done{fill:none;stroke:var(--sea);stroke-width:3.5;stroke-linecap:round}
+.wave-dot{fill:var(--sea);filter:drop-shadow(0 0 10px var(--sea))}
+.wave-labels{display:flex;justify-content:space-between;font-size:12.5px;font-weight:650;letter-spacing:.03em;color:var(--ink-3);margin-top:6px;padding:0 2px}
+.wave-labels span.on{color:var(--sea)}
+.clock{text-align:center;margin-top:14px}
+.clock b{display:block;font:600 64px/1 var(--font-d);letter-spacing:-.03em}
+.clock span{display:block;margin-top:8px;color:var(--ink-2)}
+.breath{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:18px;color:var(--ink-2);font-weight:650}
+.breath-ring{width:26px;height:26px;border-radius:50%;border:2px solid var(--sea);display:grid;place-items:center}
+.breath-ring i{display:block;width:100%;height:100%;border-radius:50%;background:var(--sea-mid);animation:breath 10s ease-in-out infinite}
+@keyframes breath{0%{transform:scale(.25)}40%{transform:scale(1)}100%{transform:scale(.25)}}
+.tips{display:grid;gap:10px}
+.tip{display:flex;gap:12px;padding:15px 17px;border-radius:16px;background:var(--sea-soft);font-size:15px}
+.tip svg{color:var(--sea);margin-top:1px}
+.tip.ember{background:var(--ember-soft)}
+.tip.ember svg{color:var(--ember)}
+.tip b{color:var(--ink)}
+.steps{counter-reset:s;margin:0;padding:0;list-style:none}
+.steps li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
+.steps li:first-child{border-top:0;padding-top:4px}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--sea-soft);color:var(--sea);font-weight:700;font-size:14px}
+.steps b{display:block}
+.steps span{color:var(--ink-2);font-size:15px}
+.tool{margin-top:14px;min-height:150px}
+.ground{text-align:center;padding:18px 8px 6px}
+.ground .n{font:650 56px/1 var(--font-d);color:var(--sea)}
+.ground p{font:500 19px/1.4 var(--font-d);margin-top:8px}
+.ground .faint{margin-top:6px}
+.letter{white-space:pre-wrap;font:500 17.5px/1.6 var(--font-d);padding:4px 2px}
+.dock{position:sticky;bottom:0;margin:22px -20px 0;padding:22px 20px calc(env(safe-area-inset-bottom,0px) + 14px);background:linear-gradient(to bottom,transparent,var(--bg) 26%);display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;z-index:2}
+.done-mark{display:block;width:84px;height:84px;margin:24px auto 8px;color:var(--sea)}
+.done-mark path{stroke-dasharray:120;stroke-dashoffset:120;animation:draw .9s .1s var(--ease) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.center{text-align:center}
+.lockpad{max-width:340px;margin:16vh auto 0;text-align:center}
+.lockpad svg.i{width:40px;height:40px;stroke-width:1.5;color:var(--sea)}
+.lockpad .input{text-align:center;font-size:24px;letter-spacing:.5em;margin-top:22px}
+
+.modal-back{position:fixed;inset:0;z-index:80;background:rgba(5,14,17,.55);display:grid;place-items:end center;padding:16px;animation:fade .2s ease}
+@media (min-width:600px){.modal-back{place-items:center}}
+.modal{width:100%;max-width:420px;background:var(--bg-2);border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:var(--shadow);margin-bottom:env(safe-area-inset-bottom,0px);animation:layerIn .3s var(--ease)}
+.modal p{color:var(--ink-2);margin-top:6px}
+.modal .row{margin-top:20px;justify-content:flex-end}
+@keyframes fade{from{opacity:0}}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:90;background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;font-weight:600;font-size:15px;box-shadow:var(--shadow);animation:layerIn .3s var(--ease);max-width:calc(100% - 32px)}
+@media (min-width:900px){.toast{bottom:32px}}
+video.scan{width:100%;border-radius:16px;background:#000;margin-top:12px;aspect-ratio:1;object-fit:cover}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .breath-ring i{animation:none;transform:scale(.7)}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="nav" aria-label="Sections">
+    <div class="brand"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="var(--sea)"/><path d="M5 21c3.2 0 4-10 7.3-10S16.5 21 27 21" fill="none" stroke="var(--sea-ink)" stroke-width="2.6" stroke-linecap="round"/></svg>Steady</div>
+  </nav>
+  <main id="view" tabindex="-1"></main>
+</div>
+<div id="layer" class="layer" hidden></div>
+<div id="lock" class="layer" hidden></div>
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+
+<script>
+(()=>{
+'use strict';
+/* ================= constants ================= */
+const DKEY='steady.data', LKEY='steady.local', UIKEY='steady.ui', OLDKEY='steady.v1', DAY=864e5;
+const SB_URL='https://taqhrzoekgjgowolrset.supabase.co/rest/v1/rpc/', SB_KEY='sb_publishable_69qzXjO_OC_gphDTddCmhQ_10gVQAAN';
+const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const TRIGGERS=[
+  {id:'memory',label:'The memory'},{id:'lonely',label:'Lonely'},{id:'bored',label:'Bored'},
+  {id:'stress',label:'Stressed'},{id:'night',label:'Late night'},{id:'body',label:'Physical urge'},
+  {id:'saw',label:'Saw something'},{id:'other',label:'Something else'}];
+const ACTIONS=[
+  {id:'walk',label:'Went outside'},{id:'shower',label:'Cold shower'},{id:'exercise',label:'Exercise'},
+  {id:'write',label:'Wrote it out'},{id:'breathe',label:'Sat with it'},{id:'talk',label:'Talked to someone'},
+  {id:'distract',label:'Did something else'},{id:'sleep',label:'Went to sleep'}];
+const PLAN_HINTS={memory:'go outside for 10 minutes, then write one paragraph about what I’m feeling',lonely:'message a friend or go somewhere with people around',
+  bored:'start something with my hands: cook, clean, play, build',stress:'do 20 push-ups and a cold shower',night:'put my phone in another room and go to sleep',
+  body:'cold shower, then exercise until it passes',saw:'close it right away and leave the room',other:'leave the room and start the timer'};
+const CHECKIN=[
+  {k:'mood',label:'Mood',opts:['Rough','Low','Okay','Good'],bad:[0,1],word:'your mood was low'},
+  {k:'sleep',label:'Sleep',opts:['Poor','Okay','Good'],bad:[0],word:'you slept badly'},
+  {k:'lonely',label:'Lonely',opts:['No','A bit','Very'],bad:[1,2],word:'you felt lonely'},
+  {k:'stress',label:'Stress',opts:['Low','Some','High'],bad:[2],word:'you were stressed'},
+  {k:'memory',label:'On my mind',opts:['Not her','A little','A lot'],bad:[2],word:'she was on your mind a lot'}];
+const MILESTONES=[1,3,7,14,21,30,45,60,90,120,180,270,365,500,730,1000];
+const PROMPTS=[
+  {t:'What happened',p:'Write what happened between you and her, as plainly as you can. Start at the beginning and go in order.'},
+  {t:'What you felt',p:'What did you feel back then? And what do you feel now, when the memory comes back without warning?'},
+  {t:'What you wish',p:'What do you wish had gone differently? Which parts were in your control, and which never were?'},
+  {t:'Who you are now',p:'What has this taught you about what you need? Who do you want to be from here, with or without her?'}];
+const GROUND=[
+  {n:5,p:'things you can see',h:'Look around slowly. Name each one, out loud if you can.'},
+  {n:4,p:'things you can feel',h:'Your feet on the floor, your clothes, the air, something in your hand.'},
+  {n:3,p:'things you can hear',h:'Near and far. Traffic, a fan, your own breath.'},
+  {n:2,p:'things you can smell',h:'Move somewhere if you need to. Soap, coffee, fresh air.'},
+  {n:1,p:'thing you can taste',h:'Or take a sip of water and notice it.'}];
+
+/* ================= state ================= */
+const fresh=()=>({v:2,start:Date.now(),reason:'',timerMin:15,settingsU:0,onboarded:false,entries:[],journal:[],checkins:[],plans:{},letter:null,tomb:{}});
+const freshLocal=()=>({pinHash:null,theme:'system',active:null,sync:null});
+function readJSON(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}}
+let D=readJSON(DKEY), L=Object.assign(freshLocal(),readJSON(LKEY)||{});
+if(!D||D.v!==2){
+  D=fresh();const old=readJSON(OLDKEY);
+  if(old&&old.v===1){Object.assign(D,{start:old.start,reason:old.reason||'',timerMin:old.timerMin||15,onboarded:!!old.onboarded,
+    entries:(old.entries||[]).map(e=>Object.assign({u:e.ts},e)),journal:(old.journal||[]).map(j=>Object.assign({u:j.ts},j))});
+    L.pinHash=old.pinHash||null;L.theme=old.theme||'system';}
+}
+D=Object.assign(fresh(),D);
+let UI=Object.assign({tab:'today',rmode:'write',wmode:'guided',draft:'',cal:null,showAllNotes:false},readJSON(UIKEY)||{});
+if(UI.tab==='log')UI.tab='journey';if(UI.tab==='write')UI.tab='reflect';
+let saveTimer=null;
+function save(sync=true){try{localStorage.setItem(DKEY,JSON.stringify(D));}catch(e){toast('Couldn’t save on this device');}if(sync)queueSync();}
+function saveLocal(){try{localStorage.setItem(LKEY,JSON.stringify(L));}catch(e){}}
+function saveUI(){try{localStorage.setItem(UIKEY,JSON.stringify(UI));}catch(e){}}
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
+
+/* ================= helpers ================= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const tLabel=id=>(TRIGGERS.find(t=>t.id===id)||{label:'Not noted'}).label;
+const aLabel=id=>(ACTIONS.find(a=>a.id===id)||{label:id}).label;
+const fmtTime=ts=>new Date(ts).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+const dayKey=ts=>{const d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const todayKey=()=>dayKey(Date.now());
+function fmtDay(ts){const d=new Date(ts),t=new Date(),y=new Date();y.setDate(t.getDate()-1);
+  if(d.toDateString()===t.toDateString())return'Today';if(d.toDateString()===y.toDateString())return'Yesterday';
+  return d.toLocaleDateString([], {weekday:'long',month:'short',day:'numeric'});}
+const h12=h=>{h=((h%24)+24)%24;return h===0?'12am':h<12?h+'am':h===12?'12pm':(h-12)+'pm';};
+const hourRange=b=>h12(b*3)+'–'+h12(b*3+3);
+const mmss=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+const plural=(n,w)=>n+' '+w+(n===1?'':'s');
+const sortByTs=a=>a.sort((x,y)=>x.ts-y.ts||(x.id<y.id?-1:1));
+const median=a=>{if(!a.length)return 0;const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2;};
+const vibrate=p=>{try{navigator.vibrate&&navigator.vibrate(p);}catch(e){}};
+
+const ICON={
+  today:'<path d="M2.5 15.5c2.6 0 3.1-7 6.1-7s3.6 7 6.3 7 3.3-4 6.6-4"/>',
+  journey:'<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  insights:'<path d="M3 20.5h18"/><path d="M6.5 17V11M12 17V5.5M17.5 17v-4"/>',
+  reflect:'<path d="M4 20h4.2L19.4 8.8a2.1 2.1 0 0 0 0-3L18.2 4.6a2.1 2.1 0 0 0-3 0L4 15.8V20z"/><path d="M13.5 6.5l4 4"/>',
+  settings:'<path d="M4 7h9M19 7h1M4 17h3M13 17h7"/><circle cx="16" cy="7" r="2.4"/><circle cx="10" cy="17" r="2.4"/>',
+  close:'<path d="M6 6l12 12M18 6L6 18"/>',
+  trash:'<path d="M4.5 7h15M10 11v6M14 11v6M6.5 7l1 12.5h9L17.5 7M9.5 7V4.5h5V7"/>',
+  spark:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/>',
+  plan:'<path d="M5 12h11M12 6l6 6-6 6"/>',
+  quote:'<path d="M9 7H6a2 2 0 0 0-2 2v3h5V7zM9 12c0 3-1.5 4.5-4 5M20 7h-3a2 2 0 0 0-2 2v3h5V7zM20 12c0 3-1.5 4.5-4 5"/>',
+  lock:'<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>',
+  left:'<path d="M15 5l-7 7 7 7"/>', right:'<path d="M9 5l7 7-7 7"/>'
+};
+const icon=(n,cls='i')=>`<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICON[n]}</svg>`;
+const WAVE='M6,128 C62,128 74,24 120,24 C168,24 208,128 314,128';
+const waveArt=w=>`<svg viewBox="0 0 320 150" aria-hidden="true" style="width:100%;height:auto;display:block"><path d="${WAVE}" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round"/></svg>`;
+
+function toast(msg){const t=document.createElement('div');t.className='toast';t.setAttribute('role','status');t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2800);}
+function ask(title,body,ok='Confirm',danger=false){return new Promise(res=>{
+  const b=document.createElement('div');b.className='modal-back';
+  b.innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt"><h2 id="mt">${esc(title)}</h2><p>${esc(body)}</p>
+  <div class="row"><button class="btn btn-quiet" data-r="0">Cancel</button><button class="btn ${danger?'btn-danger':'btn-primary'}" data-r="1">${esc(ok)}</button></div></div>`;
+  const done=v=>{b.remove();document.removeEventListener('keydown',k);res(v);};
+  const k=e=>{if(e.key==='Escape')done(false);};
+  b.addEventListener('click',e=>{const r=e.target.closest('[data-r]');if(r)done(r.dataset.r==='1');else if(e.target===b)done(false);});
+  document.addEventListener('keydown',k);document.body.appendChild(b);b.querySelector('[data-r="1"]').focus();});}
+
+/* ================= stats ================= */
+const live=()=>D.entries;
+const slips=()=>D.entries.filter(e=>e.outcome==='slipped').map(e=>e.ts).sort((a,b)=>a-b);
+function streakStart(){const sl=slips().filter(t=>t>=D.start);return sl.length?sl[sl.length-1]:D.start;}
+const days=(a,b)=>Math.max(0,Math.floor((b-a)/DAY));
+const currentStreak=()=>days(streakStart(),Date.now());
+function pastStreaks(){const p=[D.start,...slips().filter(t=>t>=D.start)];const out=[];for(let i=1;i<p.length;i++)out.push(days(p[i-1],p[i]));return out;}
+const bestStreak=()=>Math.max(currentStreak(),...pastStreaks(),0);
+const wins=()=>D.entries.filter(e=>e.outcome==='rode').length;
+function whatWorked(trigger){
+  const m={};D.entries.filter(e=>e.kind==='urge'&&(!trigger||e.trigger===trigger)&&e.actions&&e.actions.length)
+    .forEach(e=>e.actions.forEach(a=>{m[a]=m[a]||{n:0,w:0};m[a].n++;if(e.outcome==='rode')m[a].w++;}));
+  return Object.entries(m).filter(([,v])=>v.n>=2).map(([a,v])=>({a,n:v.n,w:v.w,rate:v.w/v.n,score:(v.w+1)/(v.n+2)})).sort((x,y)=>y.score-x.score||y.n-x.n);}
+function topTrigger(){const m={};D.entries.forEach(e=>{if(e.trigger)m[e.trigger]=(m[e.trigger]||0)+1;});
+  const t=Object.entries(m).sort((a,b)=>b[1]-a[1])[0];return t&&t[1]>=3?{id:t[0],n:t[1]}:null;}
+const checkinFor=k=>D.checkins.find(c=>c.day===k);
+const planFor=t=>t&&D.plans[t]&&D.plans[t].text?D.plans[t].text:'';
+function lastSaid(trigger){const s=[...D.entries].reverse().find(e=>e.outcome==='slipped'&&e.reflect&&e.reflect.next&&(!trigger||e.trigger===trigger));return s?s:null;}
+function typicalMinutes(){const d=D.entries.filter(e=>e.outcome==='rode'&&e.kind==='urge'&&e.durationSec>30).map(e=>e.durationSec/60);return d.length>=4?Math.max(1,Math.round(median(d))):0;}
+
+/* how much more likely urges are on "bad" check-in days, per factor */
+function correlations(){
+  if(D.checkins.length<6)return[];
+  const perDay={};D.entries.forEach(e=>{const k=dayKey(e.ts);perDay[k]=(perDay[k]||0)+1;});
+  const out=[];
+  CHECKIN.forEach(f=>{const bad=[],good=[];
+    D.checkins.forEach(c=>{if(c[f.k]==null)return;(f.bad.includes(c[f.k])?bad:good).push(perDay[c.day]||0);});
+    if(bad.length>=3&&good.length>=3){const ab=bad.reduce((s,x)=>s+x,0)/bad.length,ag=good.reduce((s,x)=>s+x,0)/good.length;
+      const lift=(ab+.15)/(ag+.15);out.push({f,lift,ab,ag,nb:bad.length});}});
+  return out.sort((a,b)=>b.lift-a.lift);
+}
+function dangerZone(){const s=currentStreak(),past=pastStreaks().filter(x=>x>=4);
+  const hit=past.filter(x=>s>=x-3&&s<=x);return hit.length?{s,past:hit}:null;}
+
+/* risk forecast for right now / tonight */
+function forecast(){
+  const E=D.entries,now=new Date(),reasons=[];let score=0;
+  if(E.length>=5){
+    const blk=Math.floor(now.getHours()/3),share=E.filter(e=>Math.floor(new Date(e.ts).getHours()/3)===blk).length/E.length,lift=share*8;
+    score+=Math.max(-8,Math.min(30,(lift-1)*14));if(lift>=1.8)reasons.push('this time of day');
+    const w=now.getDay(),ws=E.filter(e=>new Date(e.ts).getDay()===w).length/E.length*7;
+    score+=Math.max(-5,Math.min(18,(ws-1)*10));if(ws>=1.6)reasons.push(DAYS[w]+'s');
+  }
+  const day24=E.filter(e=>Date.now()-e.ts<DAY).length;if(day24){score+=Math.min(30,day24*12);reasons.push(plural(day24,'urge')+' in the last day');}
+  const sl=slips(),ls=sl[sl.length-1];if(ls&&Date.now()-ls<2*DAY){score+=14;reasons.push('a recent slip');}
+  const h=now.getHours();if(h>=22||h<3){score+=10;reasons.push('late night');}
+  const dz=dangerZone();if(dz){score+=16;reasons.push('your usual slip point');}
+  const ci=checkinFor(todayKey());
+  if(ci){const cor=correlations();CHECKIN.forEach(f=>{if(ci[f.k]!=null&&f.bad.includes(ci[f.k])){const c=cor.find(x=>x.f.k===f.k);
+    const add=c?Math.max(0,Math.min(22,(c.lift-1)*14)):5;score+=add;if(!c||c.lift>=1.25)reasons.push(f.word);}});}
+  const level=score>=45?'high':score>=22?'medium':'low';
+  return{level,score,reasons:reasons.slice(0,3)};
+}
+
+function encourage(){
+  const s=currentStreak(),next=MILESTONES.find(m=>m>s);
+  if(s===0)return{tone:'sea',p:1,title:'Day one counts the most',body:'Don’t think about forever. Just get through today, and when an urge comes, press the button.'};
+  if(MILESTONES.includes(s))return{tone:'sea',p:6,title:`${plural(s,'day')}. That’s a milestone.`,body:'Take a second to notice it. You did this one urge at a time.'};
+  const msgs=['Urges are loudest right before they fade. You’ve already proven you can outlast them.',
+    'You’re not fighting who you are. You’re choosing who you’re becoming.',
+    'Every urge you ride out weakens the habit a little. None of them are wasted.',
+    'Being steady is quiet work. It still counts on the days nobody sees it.'];
+  return{tone:'sea',p:1,title:next?`${plural(next-s,'day')} to ${next}`:'Keep going',body:msgs[s%msgs.length]};
+}
+function helperNotes(){
+  const N=[],E=D.entries,now=Date.now(),d=new Date(),h=d.getHours();
+  const sl=slips(),lastSlip=sl[sl.length-1];
+  if(lastSlip&&now-lastSlip<2*DAY){const r=lastSaid();
+    N.push({tone:'sea',p:9,title:'A slip is information, not a verdict',body:r&&now-r.ts<2*DAY?`You told yourself: “${r.reflect.next}”. Hold on to that tonight.`:'Your day count restarted, but none of your wins disappeared. Be gentle with yourself and look at what came right before it.'});}
+  const dz=dangerZone();
+  if(dz)N.push({tone:'ember',p:10,title:`You’re near your usual slip point`,body:`Past streaks ended around day ${dz.past.join(' and ')}. You’re on day ${dz.s}. This is the stretch to be most careful: plan your evenings and keep the urge button close.`});
+  const day24=E.filter(e=>now-e.ts<6*36e5).length;
+  if(day24>=2)N.push({tone:'ember',p:8,title:'Urges are stacking up',body:`${plural(day24,'urge')} in the last 6 hours. That usually means something underneath needs attention: sleep, food, people, or the memory. Go easy on yourself tonight.`});
+  if(E.length>=5){
+    const blk=Math.floor(h/3),n=E.filter(e=>Math.floor(new Date(e.ts).getHours()/3)===blk).length;
+    if(n>=3&&n/E.length>=.25)N.push({tone:'ember',p:7,title:'This is one of your harder times',body:`${n} of your ${E.length} urges came between ${hourRange(blk)}. Decide now what you’ll do if one shows up.`});
+  }
+  if(h>=22||h<4)N.push({tone:'sea',p:5,title:'It’s late',body:'Late nights are when willpower is lowest. Charge your phone in another room and let today be done.'});
+  const cor=correlations()[0];
+  if(cor&&cor.lift>=1.4)N.push({tone:'sea',p:4,title:`When ${cor.f.word}, urges hit harder`,body:`You have about ${cor.lift.toFixed(1)}× more urges on those days. On days like that, plan your evening before it starts.`});
+  const memN=E.filter(e=>e.trigger==='memory'&&now-e.ts<14*DAY).length,wrote=D.journal.filter(j=>now-j.ts<14*DAY).length;
+  if(memN>=2&&!wrote)N.push({tone:'ember',p:6,title:'The memory keeps coming back',body:`It set off ${plural(memN,'urge')} in the last two weeks. Writing about it is how it loses its grip. Try one page today.`,act:'reflect',actL:'Start writing'});
+  const tt=topTrigger();
+  if(tt){const w=whatWorked(tt.id)[0];
+    if(!planFor(tt.id))N.push({tone:'sea',p:5,title:`Make a plan for “${tLabel(tt.id).toLowerCase()}”`,body:'It’s your most common trigger. Deciding what you’ll do ahead of time makes it far easier in the moment.',act:'plans',actL:'Make a plan'});
+    else if(w&&w.rate>=.5)N.push({tone:'sea',p:3,title:`For “${tLabel(tt.id).toLowerCase()}”, “${aLabel(w.a).toLowerCase()}” works`,body:`It helped you ride it out ${w.w} of ${w.n} times.`});}
+  const tm=typicalMinutes();if(tm&&tm+3<D.timerMin)N.push({tone:'sea',p:2,title:`Your urges usually pass in about ${tm} minutes`,body:'Knowing that makes the next one easier: you only have to hold on that long.'});
+  const r=E.filter(e=>now-e.ts<14*DAY),pr=E.filter(e=>now-e.ts>=14*DAY&&now-e.ts<28*DAY),avg=a=>a.reduce((s,e)=>s+(e.intensity||5),0)/a.length;
+  if(r.length>=3&&pr.length>=3){const a=avg(r),b=avg(pr);if(a<b-.5)N.push({tone:'sea',p:3,title:'Your urges are getting weaker',body:`Average strength ${a.toFixed(1)} over the last two weeks, down from ${b.toFixed(1)}. That’s the habit losing its hold.`});}
+  let run=0;for(let i=E.length-1;i>=0&&E[i].outcome==='rode';i--)run++;
+  if(run>=3)N.push({tone:'sea',p:3,title:`${run} urges in a row, ridden out`,body:'Each one you outlast makes the next a little easier.'});
+  N.push(encourage());
+  return N.sort((a,b)=>b.p-a.p);
+}
+
+/* ================= views ================= */
+const TABS=[['today','Today'],['journey','Journey'],['insights','Insights'],['reflect','Reflect'],['settings','Settings']];
+function renderNav(){const nav=$('.nav');nav.querySelectorAll('button').forEach(b=>b.remove());
+  TABS.forEach(([id,l])=>{const b=document.createElement('button');b.dataset.tab=id;b.innerHTML=icon(id)+`<span>${l}</span>`;
+    if(UI.tab===id)b.setAttribute('aria-current','page');nav.appendChild(b);});}
+function render(focus){
+  if(document.activeElement&&document.activeElement.matches('main textarea,main input:not([type=range])')&&!focus)return;
+  renderNav();$('.nav').hidden=!D.onboarded;const v=$('#view');
+  v.innerHTML=({today:vToday,journey:vJourney,insights:vInsights,reflect:vReflect,settings:vSettings}[UI.tab]||vToday)();
+  bindView();if(focus)v.focus({preventScroll:true});
+}
+function greeting(){const h=new Date().getHours();return h<5?'Late night':h<12?'Good morning':h<18?'Good afternoon':'Good evening';}
+function syncPill(){if(!L.sync)return'';const s=syncState;const t=s==='error'?'Sync paused':s==='syncing'?'Syncing…':L.sync.last?'Synced':'Not synced yet';
+  return`<span class="sync-pill ${s==='error'?'err':''}"><i></i>${t}</span>`;}
+
+function vOnboard(){return`
+  <div class="stack" style="--gap:14px;margin-top:8px">
+    <div style="width:140px;color:var(--sea)">${waveArt(7)}</div>
+    <h1>Steady</h1>
+    <p class="muted" style="font-size:17px">A private place to ride out urges. Urges rise, peak, and pass, like a wave. This app helps you get to the other side, and learns what works for you.</p>
+    <p class="faint">Everything is encrypted and stays yours.</p>
+  </div>
+  <div class="stack section" style="--gap:22px">
+    <label class="field"><span>Why are you doing this?</span>
+      <textarea class="input" id="obReason" placeholder="Write it to yourself. You’ll see it every time an urge hits."></textarea></label>
+    <label class="field"><span>When did your current streak start?</span>
+      <input class="input" type="date" id="obStart" value="${todayKey()}" max="${todayKey()}"></label>
+    <button class="btn btn-primary btn-block btn-lg" data-act="begin">Begin</button>
+    <div class="center"><button class="btn btn-link" data-act="pairEnter">Already using Steady on another device? Connect it</button></div>
+  </div>`;}
+
+function vToday(){
+  if(!D.onboarded)return vOnboard();
+  const s=currentStreak(),b=bestStreak(),w=wins(),fc=forecast(),ci=checkinFor(todayKey());
+  const notes=helperNotes(),shown=UI.showAllNotes?notes:notes.slice(0,3);
+  const fcText={low:'Low risk right now',medium:'Medium risk right now',high:'High risk right now'}[fc.level];
+  const fcSub=fc.reasons.length?(fc.level==='low'?'Keep an eye on: ':'Because of ')+fc.reasons.join(', ')+'.':(D.entries.length<5?'This gets sharper as you log urges and check in.':'Nothing in your patterns points to trouble right now.');
+  const tt=topTrigger(),pl=tt&&planFor(tt.id);
+  return`
+  <div class="hello"><span>${greeting()}</span>${syncPill()}</div>
+  <div class="streak"><div class="streak-n">${s}</div><div class="streak-l"><b>${s===1?'day':'days'} steady</b><span>since ${new Date(streakStart()).toLocaleDateString([], {month:'short',day:'numeric'})}</span></div></div>
+  <div class="meta"><div><b>${b}</b><span>best streak</span></div><div><b>${w}</b><span>${w===1?'urge':'urges'} beaten</span></div></div>
+  <button class="urge" data-act="urge">
+    <span class="ring">${icon('today')}</span>
+    <span style="position:relative;z-index:1"><b>I’m having an urge</b><span class="urge-sub">One tap. The timer starts right away.</span></span>
+    <span class="urge-wave">${waveArt(10)}</span>
+  </button>
+  <div class="forecast ${fc.level}"><div class="meter" aria-hidden="true"><i></i><i></i><i></i></div><b>${fcText}</b><p>${esc(fcSub)}${fc.level==='high'&&pl?` Your plan: ${esc(pl)}.`:''}</p></div>
+  <div class="section"><div class="sec-h"><h2>Daily check-in</h2>${ci&&!UI.ciEdit?'':`<span class="faint">10 seconds</span>`}</div>${checkinHTML(ci)}</div>
+  <div class="section"><h2>For you right now</h2>
+    <div class="notes" style="margin-top:12px">${shown.map(n=>`<div class="note ${n.tone}"><i></i><div><b>${esc(n.title)}</b><p>${esc(n.body)}</p>${n.act?`<button class="btn btn-link" data-act="${n.act==='plans'?'goPlans':'go'}" data-to="${n.act}">${esc(n.actL||'Open')} →</button>`:''}</div></div>`).join('')}</div>
+    ${notes.length>3?`<button class="btn btn-quiet" style="margin-left:-12px" data-act="moreNotes">${UI.showAllNotes?'Show less':`Show ${notes.length-3} more`}</button>`:''}
+  </div>
+  <div class="section"><h2 style="margin-bottom:14px">Why I’m doing this</h2>
+    ${D.reason?`<div class="reason"><q>${esc(D.reason)}</q><button class="btn btn-link" style="margin-top:4px" data-act="goLetter">Edit</button></div>`
+      :`<div class="reason"><p class="muted">You haven’t written your reason yet. It’s what you’ll read when an urge is at its peak.</p><button class="btn btn-ghost" style="margin-top:14px" data-act="goLetter">Write it</button></div>`}
+    <div class="quick"><button class="btn btn-ghost" data-act="slip">Log a slip</button><button class="btn btn-ghost" data-act="go" data-to="reflect">Write</button></div>
+  </div>`;
+}
+function checkinHTML(ci){
+  if(ci&&!UI.ciEdit){const bits=CHECKIN.filter(f=>ci[f.k]!=null).map(f=>f.label.toLowerCase()+' '+f.opts[ci[f.k]].toLowerCase());
+    return`<div class="panel ci-done"><p>Done for today: ${esc(bits.join(', '))}.</p><button class="btn btn-link" data-act="ciEdit">Edit</button></div>`;}
+  return`<div class="panel checkin" style="margin-top:0">${CHECKIN.map(f=>`<div class="ci-row"><span class="label">${f.label}</span><div class="seg" role="group" aria-label="${f.label}">${f.opts.map((o,i)=>`<button data-act="ci" data-k="${f.k}" data-v="${i}" aria-pressed="${!!ci&&ci[f.k]===i}">${o}</button>`).join('')}</div></div>`).join('')}
+    <p class="faint" style="margin-top:10px">Tap one per row. The helper uses this to spot which days are risky for you.</p>${ci?`<button class="btn btn-link" data-act="ciDone">Done</button>`:''}</div>`;
+}
+
+function vJourney(){
+  const now=new Date();if(!UI.cal)UI.cal=todayKey().slice(0,7);
+  const [Y,M]=UI.cal.split('-').map(Number),first=new Date(Y,M-1,1),dim=new Date(Y,M,0).getDate(),lead=(first.getDay()+6)%7;
+  const byDay={};D.entries.forEach(e=>{const k=dayKey(e.ts);(byDay[k]=byDay[k]||[]).push(e);});
+  const startK=dayKey(D.start),tk=todayKey();
+  let cal='<div class="cal">'+['M','T','W','T','F','S','S'].map(d=>`<span class="dn">${d}</span>`).join('')+'<span></span>'.repeat(lead);
+  for(let d=1;d<=dim;d++){const k=`${Y}-${String(M).padStart(2,'0')}-${String(d).padStart(2,'0')}`,es=byDay[k]||[];
+    let c='';if(es.some(e=>e.outcome==='slipped'))c='slip';else if(es.length)c='rode';else if(k>=startK&&k<=tk)c='steady';
+    cal+=`<span class="d ${c} ${k===tk?'today':''}" title="${es.length?plural(es.length,'urge'):''}">${d}</span>`;}
+  cal+='</div>';
+  const monthEntries=D.entries.filter(e=>dayKey(e.ts).slice(0,7)===UI.cal).reverse();
+  let list='',last='';
+  monthEntries.forEach(e=>{const dd=fmtDay(e.ts);if(dd!==last){list+=`<div class="day-h">${esc(dd)}</div>`;last=dd;}
+    const r=e.reflect||{};
+    list+=`<div class="entry"><div class="spread"><div style="min-width:0">
+      <div class="row" style="gap:10px;flex-wrap:wrap"><span class="entry-t">${fmtTime(e.ts)}</span>${e.outcome==='rode'?'<span class="tag sea">Rode it out</span>':'<span class="tag ember">Slipped</span>'}</div>
+      <div class="entry-s">${esc(tLabel(e.trigger))}${e.intensity?` · strength ${e.intensity}/10`:''}${e.durationSec&&e.kind==='urge'?` · ${Math.max(1,Math.round(e.durationSec/60))} min`:''}${e.actions&&e.actions.length?' · '+e.actions.map(a=>esc(aLabel(a).toLowerCase())).join(', '):''}</div>
+      ${e.note?`<div class="entry-n">${esc(e.note)}</div>`:''}
+      ${r.before?`<div class="entry-n"><b>Before</b>${esc(r.before)}</div>`:''}${r.feeling?`<div class="entry-n"><b>Feeling</b>${esc(r.feeling)}</div>`:''}${r.next?`<div class="entry-n"><b>Next time</b>${esc(r.next)}</div>`:''}
+    </div><button class="icon-btn del" data-act="delEntry" data-id="${e.id}" aria-label="Delete entry">${icon('trash')}</button></div></div>`;});
+  const mName=first.toLocaleDateString([], {month:'long',year:'numeric'});
+  return`<h1>Journey</h1><p class="lede">Every day you’ve been steady, every urge, and how it went.</p>
+  <div class="cal-h"><button class="icon-btn" data-act="cal" data-d="-1" aria-label="Previous month">${icon('left')}</button><b>${esc(mName)}</b><button class="icon-btn" data-act="cal" data-d="1" aria-label="Next month">${icon('right')}</button></div>
+  ${cal}
+  <div class="legend"><span><i style="background:var(--sea-soft)"></i>Steady</span><span><i style="background:var(--sea-mid)"></i>Rode out an urge</span><span><i style="background:var(--ember-mid)"></i>Slipped</span></div>
+  <div class="section" style="margin-top:28px">${monthEntries.length?list:`<p class="muted">Nothing logged in ${esc(first.toLocaleDateString([], {month:'long'}))}.</p>`}</div>`;
+}
+
+function vInsights(){
+  const E=D.entries;
+  if(E.length<3)return`<h1>Insights</h1><div class="empty"><div style="width:120px;margin:0 auto 12px;color:var(--sea);opacity:.7">${waveArt(6)}</div><p>Patterns show up after a few logs. Use the urge button a few times, do your daily check-ins, and come back.</p><p class="faint" style="margin-top:6px">${E.length} of 3 logged</p></div>`;
+  const rode=wins(),rate=Math.round(rode/E.length*100),now=Date.now(),r=E.filter(e=>now-e.ts<14*DAY),avg=a=>a.length?(a.reduce((s,e)=>s+(e.intensity||5),0)/a.length).toFixed(1):'–';
+  const grid=Array.from({length:7},()=>Array(8).fill(0));E.forEach(e=>{const d=new Date(e.ts);grid[(d.getDay()+6)%7][Math.floor(d.getHours()/3)]++;});
+  const mx=Math.max(1,...grid.flat()),dn=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let heat='<div class="heat" role="img" aria-label="Urges by day and time"><span></span>'+[0,1,2,3,4,5,6,7].map(b=>`<span class="top">${h12(b*3).replace('am','a').replace('pm','p')}</span>`).join('');
+  grid.forEach((row,i)=>{heat+=`<span class="lab">${dn[i]}</span>`+row.map(v=>`<span class="c" style="--v:${v?18+Math.round(v/mx*72):0}" title="${v}"></span>`).join('');});heat+='</div>';
+  const tm={};E.forEach(e=>{const k=e.trigger||'other';tm[k]=tm[k]||{n:0,w:0};tm[k].n++;if(e.outcome==='rode')tm[k].w++;});
+  const tmax=Math.max(...Object.values(tm).map(v=>v.n));
+  const trig=Object.entries(tm).sort((a,b)=>b[1].n-a[1].n).map(([k,v])=>`<div class="bar-row"><div class="spread"><b>${esc(tLabel(k))}</b><span>rode out ${v.w} of ${v.n}</span></div><div class="bar ember"><i style="--w:${v.n/tmax*100}%"></i></div></div>`).join('');
+  const ww=whatWorked();const acts=ww.length?ww.map(w=>`<div class="bar-row"><div class="spread"><b>${esc(aLabel(w.a))}</b><span>worked ${w.w} of ${w.n} times</span></div><div class="bar"><i style="--w:${Math.round(w.rate*100)}%"></i></div></div>`).join('')
+    :'<p class="muted">Tap what you’re doing during an urge. Once something’s been used twice, you’ll see how well it works here.</p>';
+  const cor=correlations();
+  const corH=cor.length?`<div class="facts">${cor.map(c=>`<div class="fact"><b>${c.lift>=1.2?`${c.lift.toFixed(1)}× more urges when ${esc(c.f.word)}`:`${esc(c.f.label)} doesn’t seem to matter much`}</b><span>${c.ab.toFixed(1)} urges a day on those days vs ${c.ag.toFixed(1)} on others (${plural(c.nb,'day')} measured)</span></div>`).join('')}</div>`
+    :`<p class="muted">After about a week of daily check-ins, this shows which kinds of days lead to urges, like poor sleep or loneliness. ${D.checkins.length} of 6 check-ins so far.</p>`;
+  const wk=[];for(let i=7;i>=0;i--){const a=now-(i+1)*7*DAY,b=now-i*7*DAY,x=E.filter(e=>e.ts>=a&&e.ts<b);wk.push({n:x.length,avg:x.length?x.reduce((s,e)=>s+(e.intensity||5),0)/x.length:0,l:i===0?'now':i+'w'});}
+  const weeks='<div class="weeks" role="img" aria-label="Average urge strength by week">'+wk.map(w=>`<div><i style="height:${w.avg/10*100}%;${w.n?'':'opacity:.2'}" title="${w.n?w.avg.toFixed(1):'none'}"></i><span>${w.l}</span></div>`).join('')+'</div>';
+  const past=pastStreaks().filter(x=>x>0),tmin=typicalMinutes();
+  return`<h1>Insights</h1><p class="lede">What your log says about you. The more you log, the sharper this gets.</p>
+  <div class="kpis" style="margin-top:24px"><div><b>${rate}%</b><span>urges ridden out</span></div><div><b>${bestStreak()}</b><span>best streak (days)</span></div>
+    <div><b>${avg(r)}</b><span>avg strength, last 2 weeks</span></div><div><b>${tmin?tmin+' min':'–'}</b><span>typical urge length</span></div></div>
+  <div class="section"><h2>What affects your urges</h2><div style="margin-top:14px">${corH}</div></div>
+  <div class="section"><h2>When urges hit</h2><p class="faint" style="margin:4px 0 14px">Darker means more urges at that time.</p>${heat}</div>
+  <div class="section"><h2>Your triggers</h2><div class="bars" style="margin-top:14px">${trig}</div></div>
+  <div class="section"><h2>What helps you</h2><div class="bars" style="margin-top:14px">${acts}</div></div>
+  <div class="section"><h2>Urge strength by week</h2><p class="faint" style="margin:4px 0 14px">Lower bars mean the urges are getting weaker.</p>${weeks}</div>
+  ${past.length?`<div class="section"><h2>Past streaks</h2><p class="muted" style="margin-top:8px">${past.map(x=>plural(x,'day')).join(' · ')}${dangerZone()?'. You’re close to where past streaks ended. Stay alert.':''}</p></div>`:''}`;
+}
+
+function vReflect(){
+  const m=UI.rmode;
+  const seg=`<div class="seg" style="margin-top:20px" role="group" aria-label="Reflect">${[['write','Write'],['letter','Letter'],['plans','Plans']].map(([k,l])=>`<button data-act="rmode" data-m="${k}" aria-pressed="${m===k}">${l}</button>`).join('')}</div>`;
+  let body='';
+  if(m==='write'){
+    const guided=D.journal.filter(j=>j.prompt!=null).length,step=guided%4,P=PROMPTS[step],g=UI.wmode==='guided',past=[...D.journal].reverse();
+    body=`<div class="stack" style="margin-top:22px;--gap:14px">
+      <div class="seg inline" role="group" aria-label="Writing mode"><button data-act="wmode" data-m="guided" aria-pressed="${g}">Guided, 4 days</button><button data-act="wmode" data-m="free" aria-pressed="${!g}">Free write</button></div>
+      ${g?`<div class="prompt"><div class="k">Day ${step+1} of 4 · ${esc(P.t)}</div><p>${esc(P.p)}</p></div><p class="faint">Write for 15–20 minutes without stopping to fix anything. Nobody will read this.</p>`
+         :`<p class="faint">Whatever’s on your mind. A bad night, a good day, what the urge felt like.</p>`}
+      <textarea class="input writing" id="writing" placeholder="Start anywhere…">${esc(UI.draft)}</textarea>
+      <div class="spread"><span class="faint" id="wc">${wordCount(UI.draft)} words</span><button class="btn btn-primary" data-act="saveWrite">Save</button></div></div>
+      ${past.length?`<div class="section"><h2>Earlier</h2>${past.map(j=>`<details class="past"><summary>${esc(j.prompt!=null?'Day '+(j.prompt+1)+' · '+PROMPTS[j.prompt].t:'Free write')}<span>${esc(fmtDay(j.ts))}</span></summary><div class="body">${esc(j.text)}</div><button class="btn btn-quiet" style="margin:8px 0 0 -12px;color:var(--ember)" data-act="delJournal" data-id="${j.id}">Delete</button></details>`).join('')}</div>`:''}`;
+  }else if(m==='letter'){
+    body=`<div class="stack" style="margin-top:22px;--gap:26px">
+      <label class="field"><span>Why I’m doing this</span><textarea class="input" id="lReason" placeholder="One or two lines. You’ll see it every time you open the app.">${esc(D.reason)}</textarea></label>
+      <label class="field"><span>A letter for hard moments</span><textarea class="input writing" id="lLetter" style="min-height:220px" placeholder="Write this on a good day, to the version of you who’s in the middle of an urge. What do you want him to remember?">${esc(D.letter?D.letter.text:'')}</textarea></label>
+      <p class="faint" style="margin-top:-14px">This opens in the “Letter” tab while you ride out an urge.</p>
+      <button class="btn btn-primary" data-act="saveLetter" style="justify-self:start">Save</button></div>`;
+  }else{
+    body=`<p class="muted" style="margin-top:22px">Decide now what you’ll do, so you don’t have to decide in the moment. Your plan shows up when you pick that trigger during an urge.</p>
+      <div style="margin-top:18px">${TRIGGERS.map(t=>`<div class="plan"><label class="field"><span class="label">When it’s “${esc(t.label.toLowerCase())}”, I will…</span>
+      <input class="input" data-plan="${t.id}" value="${esc(planFor(t.id))}" placeholder="e.g. ${esc(PLAN_HINTS[t.id])}"></label></div>`).join('')}</div>
+      <button class="btn btn-primary" style="margin-top:16px" data-act="savePlans">Save plans</button>`;
+  }
+  return`<h1>Reflect</h1><p class="lede">Work on what’s underneath. Encrypted, and only yours.</p>${seg}${body}`;
+}
+const wordCount=s=>(String(s||'').trim().match(/\S+/g)||[]).length;
+
+function vSettings(){
+  const sy=L.sync;
+  const syncBlock=sy?`<p class="muted">On. This device syncs with your other devices automatically. Your data is encrypted before it leaves this device.</p>
+      <p class="faint">${syncState==='error'?'Last sync failed. It will retry when you’re online.':sy.last?'Last synced '+fmtDay(sy.last).toLowerCase()+' at '+fmtTime(sy.last)+'.':'Not synced yet.'}</p>
+      <div class="row" style="margin-top:14px;flex-wrap:wrap"><button class="btn btn-ghost" data-act="pairShow">Connect another device</button><button class="btn btn-quiet" data-act="syncNow">Sync now</button></div>
+      <div id="pairBox"></div>
+      <button class="btn btn-quiet" style="margin:10px 0 0 -12px;color:var(--ember)" data-act="syncOff">Turn off sync on this device</button>`
+    :`<p class="muted">Keep your PC and phone in sync. Your data is encrypted on this device with a key only your devices have, so the server stores nothing it can read.</p>
+      <div class="row" style="margin-top:14px;flex-wrap:wrap"><button class="btn btn-primary" data-act="syncOn">Turn on sync</button><button class="btn btn-ghost" data-act="pairEnter">I have a code</button></div>`;
+  return`<h1>Settings</h1>
+  <div class="section" style="margin-top:26px">
+    <div class="set"><h3>Sync between devices</h3><div style="margin-top:8px">${syncBlock}</div></div>
+    <div class="set"><h3>Ride-out timer</h3>
+      <div class="chips" style="margin-top:12px" role="group" aria-label="Timer length">${[5,10,15,20,30].map(m=>`<button class="chip" data-act="timer" data-m="${m}" aria-pressed="${D.timerMin===m}">${m} min</button>`).join('')}</div>
+      <p class="faint">${typicalMinutes()?`Your urges usually pass in about ${typicalMinutes()} minutes.`:'Most urges peak and fade within 15–30 minutes.'}</p></div>
+    <div class="set"><h3>Streak start date</h3><input class="input" type="date" id="setStart" value="${dayKey(D.start)}" max="${todayKey()}" style="margin-top:12px;max-width:240px">
+      <p class="faint">Change this if you were already on a streak before using the app.</p></div>
+    <div class="set"><h3>Appearance</h3>
+      <div class="seg inline" style="margin-top:12px" role="group" aria-label="Theme">${[['system','Auto'],['dark','Dark'],['light','Light']].map(([k,l])=>`<button data-act="theme" data-m="${k}" aria-pressed="${L.theme===k}">${l}</button>`).join('')}</div></div>
+    <div class="set"><h3>PIN lock</h3>
+      ${L.pinHash?`<p class="muted" style="margin-top:6px">On for this device. The app asks for your PIN when it opens, and after a minute away.</p><button class="btn btn-ghost" style="margin-top:12px" data-act="pinOff">Turn off PIN</button>`
+        :`<p class="muted" style="margin-top:6px">Stops anyone who picks up this device from opening the app.</p>
+          <div class="row" style="margin-top:12px"><input class="input" id="pinNew" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="new-password" maxlength="8" placeholder="4–8 digits" style="max-width:180px"><button class="btn btn-ghost" data-act="pinOn">Set PIN</button></div>`}
+      <p class="faint">Set separately on each device. If you forget it, clear the app’s data${L.sync?' and reconnect with sync':''}.</p></div>
+    <div class="set"><h3>Backup file</h3><p class="muted" style="margin-top:6px">Save everything to a file, or load one. Loading merges, it never deletes.</p>
+      <div class="row" style="margin-top:12px;flex-wrap:wrap"><button class="btn btn-ghost" data-act="export">Save backup</button><button class="btn btn-ghost" data-act="import">Load backup</button></div></div>
+    <div class="set"><h3>Erase everything</h3><p class="muted" style="margin-top:6px">Deletes your log, writing, and settings from this device${L.sync?' and the synced copy':''}.</p>
+      <button class="btn btn-danger" style="margin-top:12px" data-act="wipe">Erase all data</button></div>
+  </div>`;
+}
+
+/* ================= view events ================= */
+function go(tab){UI.tab=tab;saveUI();render(true);window.scrollTo(0,0);}
+function bindView(){
+  const w=$('#writing');if(w)w.addEventListener('input',()=>{UI.draft=w.value;saveUI();$('#wc').textContent=wordCount(w.value)+' words';});
+  const st=$('#setStart');if(st)st.addEventListener('change',()=>{const t=new Date(st.value+'T00:00').getTime();if(!isNaN(t)&&t<=Date.now()){D.start=t;D.settingsU=Date.now();save();toast('Start date updated');}});
+}
+document.addEventListener('click',async e=>{
+  const nb=e.target.closest('.nav button[data-tab]');if(nb){go(nb.dataset.tab);return;}
+  const t=e.target.closest('[data-act]');if(!t||t.closest('#layer')||t.closest('#lock')||t.closest('.modal-back'))return;
+  const a=t.dataset.act;
+  if(a==='go')go(t.dataset.to);
+  else if(a==='goPlans'){UI.rmode='plans';go('reflect');}
+  else if(a==='goLetter'){UI.rmode='letter';go('reflect');}
+  else if(a==='begin'){D.reason=$('#obReason').value.trim();const v=$('#obStart').value,ts=v?new Date(v+'T00:00').getTime():Date.now();
+    D.start=isNaN(ts)?Date.now():Math.min(ts,Date.now());D.onboarded=true;D.settingsU=Date.now();save();render(true);}
+  else if(a==='urge')startUrge();
+  else if(a==='slip')openFlow('slip');
+  else if(a==='moreNotes'){UI.showAllNotes=!UI.showAllNotes;saveUI();render();}
+  else if(a==='ci'){const k=todayKey();let c=checkinFor(k);if(!c){c={id:'c-'+k,day:k,ts:Date.now()};D.checkins.push(c);}
+    c[t.dataset.k]=+t.dataset.v;c.u=Date.now();UI.ciEdit=CHECKIN.some(f=>c[f.k]==null)||UI.ciEdit;save();
+    if(CHECKIN.every(f=>c[f.k]!=null)&&!UI.ciEditing){UI.ciEdit=false;toast('Checked in. Thanks.');}render();}
+  else if(a==='ciEdit'){UI.ciEdit=true;UI.ciEditing=true;render();}
+  else if(a==='ciDone'){UI.ciEdit=false;UI.ciEditing=false;render();}
+  else if(a==='cal'){const [y,m]=UI.cal.split('-').map(Number),d=new Date(y,m-1+(+t.dataset.d),1);UI.cal=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');saveUI();render();}
+  else if(a==='delEntry'){if(await ask('Delete this entry?','It will be removed from your log and insights on all your devices.','Delete',true)){D.tomb[t.dataset.id]=Date.now();D.entries=D.entries.filter(x=>x.id!==t.dataset.id);save();render();}}
+  else if(a==='rmode'){UI.rmode=t.dataset.m;saveUI();render();}
+  else if(a==='wmode'){UI.wmode=t.dataset.m;saveUI();render();}
+  else if(a==='saveWrite'){const txt=($('#writing').value||'').trim();if(!txt){toast('Write something first');return;}
+    const guided=D.journal.filter(j=>j.prompt!=null).length,now=Date.now();D.journal.push({id:uid(),ts:now,u:now,prompt:UI.wmode==='guided'?guided%4:null,text:txt});
+    UI.draft='';saveUI();save();render(true);toast(UI.wmode==='guided'?'Saved. Come back tomorrow for the next one.':'Saved');}
+  else if(a==='delJournal'){if(await ask('Delete this writing?','It will be deleted on all your devices. This can’t be undone.','Delete',true)){D.tomb[t.dataset.id]=Date.now();D.journal=D.journal.filter(x=>x.id!==t.dataset.id);save();render();}}
+  else if(a==='saveLetter'){D.reason=$('#lReason').value.trim();D.settingsU=Date.now();const lt=$('#lLetter').value.trim();D.letter={text:lt,u:Date.now()};save();toast('Saved');}
+  else if(a==='savePlans'){document.querySelectorAll('[data-plan]').forEach(i=>{const k=i.dataset.plan,v=i.value.trim();if((D.plans[k]?D.plans[k].text:'')!==v)D.plans[k]={text:v,u:Date.now()};});save();toast('Plans saved');}
+  else if(a==='timer'){D.timerMin=+t.dataset.m;D.settingsU=Date.now();save();render();}
+  else if(a==='theme'){L.theme=t.dataset.m;saveLocal();applyTheme();render();}
+  else if(a==='pinOn'){const p=$('#pinNew').value.trim();if(!/^\d{4,8}$/.test(p)){toast('Use 4 to 8 digits');return;}L.pinHash=await hashPin(p);saveLocal();render();toast('PIN set');}
+  else if(a==='pinOff'){if(await ask('Turn off the PIN?','Anyone with this device will be able to open the app.','Turn off')){L.pinHash=null;saveLocal();render();}}
+  else if(a==='export')exportData();
+  else if(a==='import')$('#importFile').click();
+  else if(a==='syncOn')syncOn();
+  else if(a==='syncNow'){await syncNow(true);render();}
+  else if(a==='pairShow')showPair();
+  else if(a==='pairEnter')enterCode();
+  else if(a==='syncOff'){if(await ask('Turn off sync here?','This device keeps its data but stops syncing. Your other devices are not affected.','Turn off')){L.sync=null;saveLocal();syncState='idle';render();}}
+  else if(a==='wipe'){if(await ask('Erase everything?','Your log, writing, and settings will be deleted from this device'+(L.sync?' and from the synced copy, so your other devices will stop syncing':'')+'. This can’t be undone.','Erase',true)){
+    if(L.sync){try{const k=await syncKeys(L.sync.secret);await rpc('vault_delete',{p_id:k.id,p_write:k.write});}catch(err){}}
+    D=fresh();L=freshLocal();UI={tab:'today',rmode:'write',wmode:'guided',draft:'',cal:null};save(false);saveLocal();saveUI();applyTheme();render(true);}}
+});
+
+/* ================= backup ================= */
+function exportData(){
+  const blob=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`steady-backup-${todayKey()}.json`;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);toast('Backup saved');}
+$('#importFile').addEventListener('change',async ev=>{
+  const f=ev.target.files[0];ev.target.value='';if(!f)return;
+  try{let d=JSON.parse(await f.text());
+    if(d&&d.v===1)d=Object.assign(fresh(),{start:d.start,reason:d.reason||'',onboarded:true,entries:d.entries||[],journal:d.journal||[]});
+    if(!d||d.v!==2||!Array.isArray(d.entries))throw 0;
+    const before=D.entries.length+D.journal.length;D=mergeData(D,d);D.onboarded=true;save();render();
+    const n=D.entries.length+D.journal.length-before;toast(n?`Added ${n} item${n===1?'':'s'} from the backup`:'Nothing new in that backup');
+  }catch(e){toast('That file isn’t a Steady backup');}
+});
+
+/* ================= merge & sync ================= */
+function mergeData(a,b){
+  a=Object.assign(fresh(),a);b=Object.assign(fresh(),b);
+  const out=fresh();const tomb=Object.assign({},a.tomb,b.tomb);
+  Object.keys(tomb).sort().forEach(k=>out.tomb[k]=tomb[k]);
+  const coll=k=>{const m=new Map();[...(a[k]||[]),...(b[k]||[])].forEach(x=>{if(!x||!x.id||out.tomb[x.id])return;const c=m.get(x.id);if(!c||(x.u||x.ts||0)>(c.u||c.ts||0))m.set(x.id,x);});return sortByTs([...m.values()]);};
+  out.entries=coll('entries');out.journal=coll('journal');out.checkins=coll('checkins');
+  const s=(a.settingsU||0)>=(b.settingsU||0)?a:b;out.start=s.start;out.reason=s.reason;out.timerMin=s.timerMin;out.settingsU=s.settingsU||0;
+  const pk=[...new Set([...Object.keys(a.plans||{}),...Object.keys(b.plans||{})])].sort();
+  pk.forEach(k=>{const x=(a.plans||{})[k],y=(b.plans||{})[k];out.plans[k]=!x?y:!y?x:((x.u||0)>=(y.u||0)?x:y);});
+  const la=a.letter,lb=b.letter;out.letter=!la?lb||null:!lb?la:((la.u||0)>=(lb.u||0)?la:lb);
+  out.onboarded=!!(a.onboarded||b.onboarded);
+  return out;
+}
+const canon=x=>JSON.stringify(mergeData(x,fresh()));
+const enc=new TextEncoder(),dec=new TextDecoder();
+const toHex=buf=>[...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,'0')).join('');
+const sha=s=>crypto.subtle.digest('SHA-256',enc.encode(s));
+function b64(buf){const u=new Uint8Array(buf);let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s);}
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const B32='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function newSecret(){const b=crypto.getRandomValues(new Uint8Array(20));let s='';for(const x of b)s+=B32[x&31];/* 5 bits each */
+  const extra=crypto.getRandomValues(new Uint8Array(12));for(const x of extra)s+=B32[x&31];return s;} /* 32 chars = 160 bits */
+const fmtSecret=s=>s.match(/.{1,4}/g).join('-');
+const cleanSecret=s=>String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+let keyCache=null;
+async function syncKeys(secret){
+  if(keyCache&&keyCache.secret===secret)return keyCache;
+  const id=toHex(await sha('steady-id:'+secret)),write=toHex(await sha('steady-write:'+secret));
+  const key=await crypto.subtle.importKey('raw',await sha('steady-key:'+secret),'AES-GCM',false,['encrypt','decrypt']);
+  return keyCache={secret,id,write,key};
+}
+async function seal(k,obj){const iv=crypto.getRandomValues(new Uint8Array(12));const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},k.key,enc.encode(JSON.stringify(obj)));return'v1.'+b64(iv)+'.'+b64(ct);}
+async function unseal(k,blob){const [v,iv,ct]=blob.split('.');if(v!=='v1')throw new Error('format');return JSON.parse(dec.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(iv)},k.key,unb64(ct))));}
+async function rpc(fn,body){
+  const r=await fetch(SB_URL+fn,{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(body),cache:'no-store'});
+  const j=await r.json().catch(()=>null);if(!r.ok)throw new Error((j&&j.message)||('HTTP '+r.status));return j;}
+let syncState='idle',syncing=false,syncAgain=false,syncTimer=null;
+function queueSync(){if(!L.sync)return;clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncNow(),1500);}
+async function syncNow(manual){
+  if(!L.sync)return;if(!navigator.onLine){syncState='error';if(manual)toast('You’re offline. It’ll sync when you’re back online.');return;}
+  if(syncing){syncAgain=true;return;}syncing=true;syncState='syncing';updatePill();
+  const before=canon(D);
+  try{const k=await syncKeys(L.sync.secret);
+    for(let i=0;i<5;i++){
+      const rows=await rpc('vault_get',{p_id:k.id});let rv=0,rh=null;
+      if(rows&&rows.length){rv=rows[0].ver;
+        if(rv===L.sync.ver&&L.sync.hash)rh=L.sync.hash;
+        else{const R=await unseal(k,rows[0].blob);rh=toHex(await sha(canon(R)));D=mergeData(D,R);save(false);}}
+      const c=canon(D),mh=toHex(await sha(c));
+      if(mh===rh){L.sync.ver=rv;L.sync.hash=mh;break;}
+      const nv=await rpc('vault_put',{p_id:k.id,p_write:k.write,p_blob:await seal(k,JSON.parse(c)),p_base_ver:rv});
+      if(nv>0){L.sync.ver=nv;L.sync.hash=mh;break;}
+    }
+    L.sync.last=Date.now();saveLocal();syncState='ok';if(manual)toast('Synced');
+  }catch(err){syncState='error';if(manual)toast(/forbidden/.test(err.message)?'This sync code isn’t valid anymore':'Sync failed. It’ll retry automatically.');}
+  syncing=false;updatePill();
+  if(canon(D)!==before&&!flow)render();
+  if(syncAgain){syncAgain=false;queueSync();}
+}
+function updatePill(){const p=document.querySelector('.hello .sync-pill');if(p)p.outerHTML=syncPill();}
+async function syncOn(){
+  if(!(window.crypto&&crypto.subtle)){toast('Sync needs the installed app (secure connection)');return;}
+  L.sync={secret:newSecret(),ver:0,hash:null,last:null};saveLocal();render();await syncNow(true);render();showPair();
+}
+async function joinSync(code){
+  const s=cleanSecret(code);if(s.length!==32||[...s].some(c=>!B32.includes(c))){toast('That code doesn’t look right. Check it and try again.');return false;}
+  L.sync={secret:s,ver:0,hash:null,last:null};saveLocal();
+  const k=await syncKeys(s);let rows;try{rows=await rpc('vault_get',{p_id:k.id});}catch(e){toast('Couldn’t reach the sync server. Check your connection.');L.sync=null;saveLocal();return false;}
+  if(!rows||!rows.length){toast('No synced data found for that code.');L.sync=null;saveLocal();return false;}
+  /* the device being connected defers to the existing synced settings (start date, reason, timer) */
+  D.settingsU=0;if(D.letter&&!D.letter.text)D.letter=null;save(false);
+  await syncNow();D.onboarded=true;save(false);render(true);toast('Connected. Your devices are now in sync.');return true;
+}
+let qrLoaded=null;
+function loadQR(){return qrLoaded||(qrLoaded=new Promise((res,rej)=>{const s=document.createElement('script');s.src='vendor/qrcode.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);}));}
+async function showPair(){
+  const box=$('#pairBox');if(!box||!L.sync)return;
+  const link=location.origin+location.pathname+'#pair='+L.sync.secret;
+  let qrSvg='';try{await loadQR();const q=window.qrcode(0,'M');q.addData(link);q.make();qrSvg=q.createSvgTag({cellSize:4,margin:2,scalable:true});}catch(e){}
+  box.innerHTML=`<div class="panel" style="margin-top:16px"><h3>Connect your other device</h3>
+    <p class="muted" style="margin-top:6px">On your phone, point the camera at this code and open the link. Or open Steady there and enter the code by hand.</p>
+    ${qrSvg?`<div class="qr" aria-label="Pairing QR code">${qrSvg}</div>`:''}
+    <div class="code" style="margin-top:12px">${fmtSecret(L.sync.secret)}</div>
+    <p class="faint" style="margin-top:10px">Treat this like a password. Anyone with it can read your synced data.</p>
+    <button class="btn btn-quiet" style="margin:6px 0 0 -12px" data-act="pairHide">Hide code</button></div>`;
+  box.querySelector('[data-act="pairHide"]').addEventListener('click',()=>{box.innerHTML='';});
+}
+function enterCode(){
+  const b=document.createElement('div');b.className='modal-back';
+  b.innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-labelledby="pt"><h2 id="pt">Connect to sync</h2>
+    <p>On your other device, open Settings → Sync → Connect another device. Type the code it shows, or scan its QR code with your camera.</p>
+    <input class="input" id="pcode" style="margin-top:16px;font-family:ui-monospace,Consolas,monospace;letter-spacing:.06em" autocapitalize="characters" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX-…" enterkeyhint="done">
+    ${'BarcodeDetector' in window?`<button class="btn btn-ghost btn-block" style="margin-top:10px" data-r="scan">Scan QR code</button><video class="scan" id="scanv" playsinline muted hidden></video>`:''}
+    <div class="row"><button class="btn btn-quiet" data-r="0">Cancel</button><button class="btn btn-primary" data-r="1">Connect</button></div></div>`;
+  let stream=null;const stop=()=>{if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;};
+  const close=()=>{stop();b.remove();};
+  b.addEventListener('click',async e=>{const r=e.target.closest('[data-r]');if(!r){if(e.target===b)close();return;}
+    if(r.dataset.r==='0')close();
+    else if(r.dataset.r==='1'){const v=$('#pcode').value;r.disabled=true;if(await joinSync(v))close();else r.disabled=false;}
+    else if(r.dataset.r==='scan'){try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});const v=$('#scanv');v.hidden=false;v.srcObject=stream;await v.play();
+      const det=new BarcodeDetector({formats:['qr_code']});const loop=async()=>{if(!stream)return;try{const c=await det.detect(v);if(c.length){const m=c[0].rawValue.match(/#pair=([A-Z0-9]+)/i);const code=m?m[1]:c[0].rawValue;stop();$('#pcode').value=fmtSecret(cleanSecret(code));if(await joinSync(code))close();return;}}catch(err){}requestAnimationFrame(loop);};loop();
+    }catch(err){toast('Couldn’t open the camera');}}});
+  document.body.appendChild(b);setTimeout(()=>$('#pcode').focus(),50);
+}
+async function handlePairLink(){
+  const m=location.hash.match(/^#pair=([A-Z0-9]+)$/i);if(!m)return;history.replaceState(null,'',location.pathname+location.search);
+  if(L.sync&&L.sync.secret===cleanSecret(m[1])){toast('This device is already connected');return;}
+  if(await ask('Connect this device?','Your log will sync with your other device. Anything already on this device is kept and merged.','Connect'))await joinSync(m[1]);
+}
+
+/* ================= urge flow ================= */
+let flow=null,tickT=null,wakeLock=null;
+const LY=$('#layer');
+async function keepAwake(on){try{if(on&&'wakeLock' in navigator&&!wakeLock){wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',()=>{wakeLock=null;});}else if(!on&&wakeLock){await wakeLock.release();wakeLock=null;}}catch(e){}}
+function startUrge(){L.active={start:Date.now(),trigger:null,intensity:6,actions:[],durMin:D.timerMin,phase:0};saveLocal();vibrate(30);openFlow('ride');}
+function openFlow(step){flow={step,tool:'steps',ground:0,slip:{trigger:null,intensity:6},result:null};LY.hidden=false;document.body.style.overflow='hidden';drawFlow();}
+function closeFlow(){LY.hidden=true;LY.innerHTML='';document.body.style.overflow='';flow=null;clearInterval(tickT);keepAwake(false);render();}
+function chipsHTML(list,sel,act,multi){return`<div class="chips" role="group">${list.map(x=>`<button class="chip" data-f="${act}" data-v="${x.id}" aria-pressed="${multi?sel.includes(x.id):sel===x.id}">${esc(x.label)}</button>`).join('')}</div>`;}
+function rangeHTML(v){return`<input type="range" min="1" max="10" step="1" value="${v}" data-f="intensity" aria-label="How strong is it, 1 to 10" style="--p:${(v-1)/9*100}%"><div class="spread faint"><span>Mild</span><span id="iv">${v}/10</span><span>Overwhelming</span></div>`;}
+function tipsHTML(A){
+  const out=[],tr=A.trigger,pl=planFor(tr);
+  if(pl)out.push(`<div class="tip">${icon('plan')}<div><b>Your plan:</b> ${esc(pl)}</div></div>`);
+  const ls=tr&&lastSaid(tr);if(ls)out.push(`<div class="tip ember">${icon('quote')}<div><b>Last time this led to a slip, you said:</b> “${esc(ls.reflect.next)}”</div></div>`);
+  const ww=(tr&&whatWorked(tr)[0])||whatWorked()[0];
+  if(ww&&ww.rate>=.5&&!pl)out.push(`<div class="tip">${icon('spark')}<div><b>What’s worked before:</b> ${esc(aLabel(ww.a).toLowerCase())}. It helped ${ww.w} of ${ww.n} times${tr&&whatWorked(tr)[0]?' with this trigger':''}.</div></div>`);
+  const tm=typicalMinutes();if(tm&&!out.length)out.push(`<div class="tip">${icon('spark')}<div><b>Your urges usually pass in about ${tm} minutes.</b> You only have to hold on that long.</div></div>`);
+  return out.join('');
+}
+function toolHTML(){
+  const A=L.active,tr=A&&A.trigger;
+  if(flow.tool==='steps'){const name=tr==='memory'?'“This is the memory. This is pain, not desire.”':'“This is an urge. It will rise, peak, and pass.”';
+    return`<ol class="steps"><li><div><b>Name it</b><span>${name}</span></div></li>
+      <li><div><b>Don’t decide yet</b><span>You only have to wait until the timer ends. Not forever, just this wave.</span></div></li>
+      <li><div><b>Move</b><span>Leave the room you’re in. Walk, shower, push-ups. Change your body’s state.</span></div></li>
+      <li><div><b>Feel it</b><span>Let the sadness or restlessness be there. It peaks, then it passes.</span></div></li></ol>`;}
+  if(flow.tool==='ground'){const g=GROUND[flow.ground];
+    if(!g)return`<div class="ground"><div class="n">${icon('spark','i')}</div><p>You’re here, in this room, right now.</p><p class="faint">That’s grounding. Notice whether the urge feels a little further away.</p><button class="btn btn-link" data-f="groundReset">Do it again</button></div>`;
+    return`<div class="ground"><div class="n">${g.n}</div><p>${g.p}</p><p class="faint">${g.h}</p><button class="btn btn-ghost" style="margin-top:14px;min-width:140px" data-f="groundNext">${flow.ground<4?'Next':'Done'}</button></div>`;}
+  const lt=D.letter&&D.letter.text;
+  return lt?`<div class="letter">${esc(lt)}</div>`:`<p class="muted" style="padding-top:6px">${D.reason?`<span class="letter" style="display:block;margin-bottom:12px">“${esc(D.reason)}”</span>`:''}You haven’t written a letter yet. On a good day, write one to yourself for moments like this, in Reflect → Letter.</p>`;
+}
+function drawFlow(){
+  clearInterval(tickT);const A=L.active,st=flow.step;let h='';
+  const top=(label,close=true)=>`<div class="layer-top"><span class="faint">${esc(label)}</span>${close?`<button class="icon-btn" data-f="close" aria-label="Close">${icon('close')}</button>`:''}</div>`;
+  if(st==='ride'){
+    h=top('Riding it out')+`
+      <h1 class="sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Riding out an urge</h1>
+      <div style="margin:2px -4px 0"><svg class="wave" viewBox="0 0 320 150" aria-hidden="true">
+        <defs><clipPath id="wclip"><rect id="wclipRect" x="0" y="0" width="0" height="150"/></clipPath></defs>
+        <path class="wave-area" d="${WAVE} L314,150 L6,150 Z" clip-path="url(#wclip)"/>
+        <path class="wave-base" d="${WAVE}"/><path class="wave-done" id="waveDone" d="${WAVE}"/>
+        <circle class="wave-dot" id="waveDot" r="8" cx="6" cy="128"/></svg>
+        <div class="wave-labels"><span data-ph="0">Rising</span><span data-ph="1">Peak</span><span data-ph="2">Passing</span></div></div>
+      <div class="clock"><b id="clk">${mmss(A.durMin*60000)}</b><span id="phase" aria-live="polite">Let it come. You don’t have to act on it.</span></div>
+      <div class="breath"><span class="breath-ring"><i></i></span><span id="breath">Breathe in</span></div>
+      ${D.reason?`<div class="reason" style="margin-top:28px"><div class="faint" style="margin-bottom:8px;font-weight:650">Why you’re doing this</div><q>${esc(D.reason)}</q></div>`:''}
+      <div class="tips" id="tips" style="margin-top:14px">${tipsHTML(A)}</div>
+      <div class="section" style="margin-top:30px"><h3 style="margin-bottom:12px">What set it off? <span class="faint" style="font-weight:500">Optional, helps the app learn</span></h3>${chipsHTML(TRIGGERS,A.trigger,'trigger')}
+        <div style="margin-top:16px"><span class="label">How strong is it?</span>${rangeHTML(A.intensity)}</div></div>
+      <div class="section" style="margin-top:30px"><div class="seg" role="group" aria-label="Tools">${[['steps','Steps'],['ground','Ground me'],['letter','Letter']].map(([k,l])=>`<button data-f="tool" data-v="${k}" aria-pressed="${flow.tool===k}">${l}</button>`).join('')}</div>
+        <div class="tool" id="tool">${toolHTML()}</div></div>
+      <div class="section" style="margin-top:26px"><h3 style="margin-bottom:12px">What are you doing right now?</h3>${chipsHTML(ACTIONS,A.actions,'action',true)}</div>
+      <div class="dock"><button class="btn btn-primary btn-lg" data-f="passed">It passed</button><button class="btn btn-quiet" data-f="slipped">I slipped</button></div>`;
+  }else if(st==='check'){
+    h=top('Time’s up',false)+`<div class="center stack" style="--gap:12px;margin-top:10vh"><h1>You made it to the end of the wave.</h1><p class="muted">How is it now?</p></div>
+      <div class="stack" style="margin-top:32px;--gap:10px"><button class="btn btn-primary btn-block btn-lg" data-f="passed">It passed</button>
+      <button class="btn btn-ghost btn-block" data-f="more">Give me 5 more minutes</button><button class="btn btn-quiet btn-block" data-f="slipped">I slipped</button></div>`;
+  }else if(st==='doneRode'){
+    const w=wins(),e=D.entries.find(x=>x.id===flow.result);
+    h=top('Logged',false)+`<svg class="done-mark" viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="40" fill="var(--sea-soft)"/><path d="M24 43l12 12 25-26" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="center stack" style="--gap:10px"><h1>You rode it out.</h1><p class="muted">That’s ${plural(w,'urge')} you’ve beaten${e&&e.durationSec>45?`. This one took ${plural(Math.max(1,Math.round(e.durationSec/60)),'minute')}`:''}. It counts.</p></div>
+      <div class="stack section" style="--gap:16px">
+        ${e&&!e.trigger?`<div><span class="label">What set it off? (optional)</span>${chipsHTML(TRIGGERS,null,'doneTrigger')}</div>`:''}
+        <label class="field"><span>Anything worth remembering? (optional)</span><textarea class="input" id="fnote" placeholder="What helped, what you noticed…"></textarea></label>
+        <button class="btn btn-primary btn-block btn-lg" data-f="finish">Done</button></div>`;
+  }else if(st==='slip'||st==='doneSlip'){
+    const fromRide=st==='doneSlip',e=fromRide&&D.entries.find(x=>x.id===flow.result),s=flow.slip;
+    h=top(fromRide?'It happened':'Log a slip')+`<div class="stack" style="--gap:10px;margin-top:2vh"><h1>${fromRide?'Okay. Breathe. This isn’t the end of anything.':'Thanks for being honest with yourself.'}</h1>
+      <p class="muted">${fromRide?'Your day count resets, but every urge you’ve ridden out still counts. People who make it to years aren’t the ones who never slip. They’re the ones who start again the next day.':'Logging it isn’t punishment. A few honest answers now are how you spot it coming next time.'}</p></div>
+      <div class="stack section" style="--gap:22px">
+        ${!fromRide||(e&&!e.trigger)?`<div><span class="label">What set it off?</span>${chipsHTML(TRIGGERS,s.trigger,'strigger')}</div>`:''}
+        ${!fromRide?`<div><span class="label">How strong was the urge?</span>${rangeHTML(s.intensity)}</div>`:''}
+        <label class="field"><span>What happened right before?</span><textarea class="input" id="rBefore" placeholder="Where you were, what you were doing, what you saw…"></textarea></label>
+        <label class="field"><span>What were you feeling underneath?</span><textarea class="input" id="rFeeling" placeholder="Lonely, rejected, bored, angry, thinking about her…"></textarea></label>
+        <label class="field"><span>What will you do differently next time?</span><textarea class="input" id="rNext" placeholder="The app will remind you of this when the same trigger shows up."></textarea></label>
+        <button class="btn btn-primary btn-block btn-lg" data-f="${fromRide?'finishSlip':'saveSlip'}">${fromRide?'Start again':'Save'}</button></div>`;
+  }
+  LY.innerHTML=`<div class="layer-in">${h}</div>`;LY.scrollTop=0;
+  const f=LY.querySelector('h1');if(f){f.setAttribute('tabindex','-1');f.focus({preventScroll:true});}
+  if(st==='ride'){keepAwake(true);tick();tickT=setInterval(tick,250);}else keepAwake(false);
+}
+function tick(){
+  const A=L.active;if(!A||!flow||flow.step!=='ride')return;
+  const total=A.durMin*60000,el=Date.now()-A.start,p=Math.min(1,el/total);
+  const c=$('#clk');if(!c)return;c.textContent=mmss(total-el);
+  const path=$('#waveDone'),len=path.getTotalLength(),pt=path.getPointAtLength(len*p);
+  path.style.strokeDasharray=len;path.style.strokeDashoffset=len*(1-p);
+  $('#waveDot').setAttribute('cx',pt.x);$('#waveDot').setAttribute('cy',pt.y);$('#wclipRect').setAttribute('x',6);$('#wclipRect').setAttribute('width',Math.max(0,pt.x-6));
+  const ph=p<.3?0:p<.5?1:2;
+  if(ph!==A.phase){A.phase=ph;saveLocal();vibrate(ph===1?[80]:[40,60,40]);}
+  LY.querySelectorAll('[data-ph]').forEach(s=>s.classList.toggle('on',+s.dataset.ph===ph));
+  const msg=['Let it come. You don’t have to act on it.','This is the peak. It’s the hardest part, and it won’t last.','It’s already weakening. Stay with it.'][ph];
+  const pe=$('#phase');if(pe.textContent!==msg)pe.textContent=msg;
+  const b=$('#breath'),bt=(el/1000)%10<4?'Breathe in':'Breathe out';if(b.textContent!==bt)b.textContent=bt;
+  if(p>=1){vibrate([200,100,200]);flow.step='check';drawFlow();}
+}
+function finishUrge(outcome){
+  const A=L.active;if(!A)return;const now=Date.now();
+  const e={id:uid(),ts:A.start,u:now,kind:'urge',trigger:A.trigger,intensity:A.intensity,actions:A.actions.slice(),outcome,note:'',durationSec:Math.round((now-A.start)/1000)};
+  D.entries.push(e);sortByTs(D.entries);L.active=null;saveLocal();save();flow.result=e.id;flow.step=outcome==='rode'?'doneRode':'doneSlip';drawFlow();
+}
+function reflectVals(){const v=id=>(($('#'+id)||{}).value||'').trim();const r={before:v('rBefore'),feeling:v('rFeeling'),next:v('rNext')};return(r.before||r.feeling||r.next)?r:null;}
+LY.addEventListener('input',e=>{
+  if(e.target.dataset.f==='intensity'){const v=+e.target.value;e.target.style.setProperty('--p',(v-1)/9*100+'%');$('#iv').textContent=v+'/10';
+    if(flow.step==='slip')flow.slip.intensity=v;else if(L.active){L.active.intensity=v;saveLocal();}}
+});
+LY.addEventListener('click',async e=>{
+  const t=e.target.closest('[data-f]');if(!t||!flow)return;const f=t.dataset.f,A=L.active;
+  const pick=(sel,v)=>LY.querySelectorAll(`[data-f="${sel}"]`).forEach(c=>c.setAttribute('aria-pressed',c.dataset.v===v));
+  if(f==='close'){
+    if(flow.step==='ride'&&A){if(!await ask('Stop the timer?','Nothing will be logged. You can start again any time.','Stop'))return;L.active=null;saveLocal();}
+    else if(flow.step==='doneRode'||flow.step==='doneSlip'){/* already saved */}
+    closeFlow();
+  }
+  else if(f==='trigger'){A.trigger=A.trigger===t.dataset.v?null:t.dataset.v;saveLocal();pick('trigger',A.trigger);$('#tips').innerHTML=tipsHTML(A);if(flow.tool==='steps')$('#tool').innerHTML=toolHTML();}
+  else if(f==='strigger'){flow.slip.trigger=t.dataset.v;pick('strigger',t.dataset.v);}
+  else if(f==='doneTrigger'){const en=D.entries.find(x=>x.id===flow.result);if(en){en.trigger=t.dataset.v;en.u=Date.now();save();}pick('doneTrigger',t.dataset.v);}
+  else if(f==='action'){const i=A.actions.indexOf(t.dataset.v);i<0?A.actions.push(t.dataset.v):A.actions.splice(i,1);saveLocal();t.setAttribute('aria-pressed',i<0);}
+  else if(f==='tool'){flow.tool=t.dataset.v;LY.querySelectorAll('[data-f="tool"]').forEach(c=>c.setAttribute('aria-pressed',c===t));$('#tool').innerHTML=toolHTML();}
+  else if(f==='groundNext'){flow.ground++;vibrate(15);$('#tool').innerHTML=toolHTML();}
+  else if(f==='groundReset'){flow.ground=0;$('#tool').innerHTML=toolHTML();}
+  else if(f==='more'){A.durMin=Math.ceil((Date.now()-A.start)/60000)+5;saveLocal();flow.step='ride';drawFlow();}
+  else if(f==='passed'){vibrate(30);finishUrge('rode');}
+  else if(f==='slipped'){if(await ask('Log this as a slip?','Your day count will restart. Your wins stay.','Log it'))finishUrge('slipped');}
+  else if(f==='finish'){const n=($('#fnote')||{}).value;const en=D.entries.find(x=>x.id===flow.result);if(en&&n&&n.trim()){en.note=n.trim();en.u=Date.now();save();}closeFlow();}
+  else if(f==='finishSlip'){const en=D.entries.find(x=>x.id===flow.result);if(en){const r=reflectVals();if(r)en.reflect=r;if(!en.trigger&&flow.slip.trigger)en.trigger=flow.slip.trigger;en.u=Date.now();save();}closeFlow();toast('Logged. Tomorrow is a new day one.');}
+  else if(f==='saveSlip'){const now=Date.now(),en={id:uid(),ts:now,u:now,kind:'slip',trigger:flow.slip.trigger,intensity:flow.slip.intensity,actions:[],outcome:'slipped',note:''};
+    const r=reflectVals();if(r)en.reflect=r;D.entries.push(en);sortByTs(D.entries);save();closeFlow();toast('Logged. Tomorrow is a new day one.');}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&flow&&!LY.hidden&&!document.querySelector('.modal-back')){const c=LY.querySelector('[data-f="close"]');if(c)c.click();}});
+
+/* ================= lock ================= */
+async function hashPin(pin){const data=enc.encode('steady:'+pin);
+  if(window.crypto&&crypto.subtle)return toHex(await crypto.subtle.digest('SHA-256',data));
+  let h=5381;for(const c of data)h=((h<<5)+h+c)|0;return'd'+(h>>>0).toString(16);}
+const LK=$('#lock');let locked=false;
+function lock(){if(!L.pinHash||locked)return;locked=true;LK.hidden=false;
+  LK.innerHTML=`<div class="lockpad">${icon('lock')}<h1 style="margin-top:12px">Steady</h1><p class="muted" style="margin-top:6px">Enter your PIN</p>
+  <form id="lockF"><input class="input" id="lockIn" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" maxlength="8" aria-label="PIN" enterkeyhint="done"><button class="btn btn-primary btn-block" style="margin-top:14px">Unlock</button></form><p class="faint" id="lockMsg" style="margin-top:12px" aria-live="polite"></p></div>`;
+  setTimeout(()=>$('#lockIn').focus(),50);
+  $('#lockF').addEventListener('submit',async ev=>{ev.preventDefault();const v=$('#lockIn').value;
+    if(await hashPin(v)===L.pinHash){locked=false;LK.hidden=true;LK.innerHTML='';handlePairLink();}else{$('#lockMsg').textContent='That’s not it. Try again.';$('#lockIn').value='';}});
+}
+let hiddenAt=0;
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){hiddenAt=Date.now();return;}
+  if(hiddenAt&&Date.now()-hiddenAt>60000)lock();
+  if(flow&&flow.step==='ride'){keepAwake(true);tick();}
+  if(!flow)render();syncNow();
+});
+window.addEventListener('online',()=>syncNow());
+
+/* ================= boot ================= */
+function applyTheme(){const r=document.documentElement;if(L.theme==='system')r.removeAttribute('data-theme');else r.dataset.theme=L.theme;}
+applyTheme();render();
+if(L.active&&L.active.start){openFlow('ride');if(Date.now()-L.active.start>=L.active.durMin*60000){flow.step='check';drawFlow();}}
+lock();if(!locked)handlePairLink();
+syncNow();
+setInterval(()=>{if(!flow&&!document.hidden){if(UI.tab==='today')render();}},60000);
+setInterval(()=>{if(!document.hidden)syncNow();},120000);
+if('serviceWorker' in navigator&&location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+})();
+</script>
+</body>
+</html>
