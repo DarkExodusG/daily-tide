@@ -76,6 +76,7 @@ svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;str
 main{max-width:640px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 24px) 20px calc(108px + env(safe-area-inset-bottom,0px))}
 @media (min-width:900px){
   .app{display:grid;grid-template-columns:232px 1fr}
+  .app.solo{grid-template-columns:1fr}
   .nav{position:sticky;top:0;height:100dvh;inset:auto;display:flex;flex-direction:column;gap:4px;padding:28px 16px;border-top:0;border-right:1px solid var(--line);background:var(--bg-2);backdrop-filter:none}
   .nav button{flex-direction:row;gap:12px;padding:11px 14px;font-size:15px;justify-content:flex-start}
   .nav button[aria-current="page"]{background:var(--sea-soft)}
@@ -567,7 +568,7 @@ function renderNav(){const nav=$('.nav');nav.querySelectorAll('button').forEach(
     if(UI.tab===id)b.setAttribute('aria-current','page');nav.appendChild(b);});}
 function render(focus){
   if(document.activeElement&&document.activeElement.matches('main textarea,main input:not([type=range])')&&!focus)return;
-  renderNav();$('.nav').hidden=!D.onboarded;const v=$('#view');
+  renderNav();$('.nav').hidden=!D.onboarded;$('.app').classList.toggle('solo',!D.onboarded);const v=$('#view');
   v.innerHTML=({today:vToday,journey:vJourney,insights:vInsights,reflect:vReflect,settings:vSettings}[UI.tab]||vToday)();
   bindView();if(focus)v.focus({preventScroll:true});
 }
