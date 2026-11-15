@@ -320,7 +320,9 @@ svg.wave{width:100%;height:auto;display:block;overflow:visible}
 .ground p{font:500 19px/1.4 var(--font-d);margin-top:8px}
 .ground .faint{margin-top:6px}
 .letter{white-space:pre-wrap;font:500 17.5px/1.6 var(--font-d);padding:4px 2px}
-.dock{position:sticky;bottom:0;margin:22px -20px 0;padding:22px 20px calc(env(safe-area-inset-bottom,0px) + 14px);background:linear-gradient(to bottom,transparent,var(--bg) 26%);display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;z-index:2}
+.dock{position:sticky;bottom:0;margin:22px -20px 0;padding:22px 20px calc(env(safe-area-inset-bottom,0px) + 14px);background:linear-gradient(to bottom,transparent,var(--bg) 26%);display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;z-index:2}
+.dock .btn-ghost{min-height:56px;padding:0 14px;background:var(--bg)}
+.dock .btn-quiet{padding:0 8px}
 .done-mark{display:block;width:84px;height:84px;margin:24px auto 8px;color:var(--sea)}
 .done-mark path{stroke-dasharray:120;stroke-dashoffset:120;animation:draw .9s .1s var(--ease) forwards}
 @keyframes draw{to{stroke-dashoffset:0}}
@@ -967,11 +969,20 @@ function drawFlow(){
       <div class="section" style="margin-top:30px"><div class="seg" role="group" aria-label="Tools">${[['steps','Steps'],['ground','Ground me'],['letter','Letter']].map(([k,l])=>`<button data-f="tool" data-v="${k}" aria-pressed="${flow.tool===k}">${l}</button>`).join('')}</div>
         <div class="tool" id="tool">${toolHTML()}</div></div>
       <div class="section" style="margin-top:26px"><h3 style="margin-bottom:12px">What are you doing right now?</h3>${chipsHTML(ACTIONS,A.actions,'action',true)}</div>
-      <div class="dock"><button class="btn btn-primary btn-lg" data-f="passed">It passed</button><button class="btn btn-quiet" data-f="slipped">I slipped</button></div>`;
+      <div class="dock"><button class="btn btn-primary btn-lg" data-f="passed">It passed</button><button class="btn btn-ghost" data-f="plus5" aria-label="Add 5 minutes">+5 min</button><button class="btn btn-quiet" data-f="slipped">I slipped</button></div>`;
   }else if(st==='check'){
-    h=top('Time’s up',false)+`<div class="center stack" style="--gap:12px;margin-top:10vh"><h1>You made it to the end of the wave.</h1><p class="muted">How is it now?</p></div>
-      <div class="stack" style="margin-top:32px;--gap:10px"><button class="btn btn-primary btn-block btn-lg" data-f="passed">It passed</button>
-      <button class="btn btn-ghost btn-block" data-f="more">Give me 5 more minutes</button><button class="btn btn-quiet btn-block" data-f="slipped">I slipped</button></div>`;
+    const strong=A&&A.intensity>=8,mins=Math.round((Date.now()-A.start)/60000);
+    h=top('Time’s up',false)+`<div class="center stack" style="--gap:12px;margin-top:8vh"><h1>You held on for ${plural(mins,'minute')}.</h1><p class="muted">How is it now?</p></div>
+      <div class="stack" style="margin-top:28px;--gap:10px"><button class="btn btn-primary btn-block btn-lg" data-f="passed">It passed</button>
+      <button class="btn btn-ghost btn-block btn-lg" data-f="more">Still strong: ride another ${strong?'10':'5'} minutes</button></div>
+      <div class="panel" style="margin-top:22px"><h3>If it’s still overwhelming</h3>
+        <ol class="steps" style="margin-top:10px">
+          <li><div><b>Get out, right now</b><span>Shoes on, leave the house. Go somewhere with people: a shop, a café, a walk on a busy street. It’s very hard to act on an urge in public.</span></div></li>
+          <li><div><b>Leave your phone behind</b><span>Or put it in your pocket and don’t touch it until you’re back.</span></div></li>
+          <li><div><b>Shock your body</b><span>Cold shower or cold water on your face for 30 seconds. It resets your nervous system fast.</span></div></li>
+          <li><div><b>Remember: you’re ${plural(mins,'minute')} in</b><span>The hardest part is already behind you. Strong urges sometimes come in a second wave, and that one is usually weaker.</span></div></li>
+        </ol></div>
+      <button class="btn btn-quiet btn-block" style="margin-top:14px" data-f="slipped">I slipped</button>`;
   }else if(st==='doneRode'){
     const w=wins(),e=D.entries.find(x=>x.id===flow.result);
     h=top('Logged',false)+`<svg class="done-mark" viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="40" fill="var(--sea-soft)"/><path d="M24 43l12 12 25-26" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1019,7 +1030,10 @@ function finishUrge(outcome){
 function reflectVals(){const v=id=>(($('#'+id)||{}).value||'').trim();const r={before:v('rBefore'),feeling:v('rFeeling'),next:v('rNext')};return(r.before||r.feeling||r.next)?r:null;}
 LY.addEventListener('input',e=>{
   if(e.target.dataset.f==='intensity'){const v=+e.target.value;e.target.style.setProperty('--p',(v-1)/9*100+'%');$('#iv').textContent=v+'/10';
-    if(flow.step==='slip')flow.slip.intensity=v;else if(L.active){L.active.intensity=v;saveLocal();}}
+    if(flow.step==='slip')flow.slip.intensity=v;
+    else if(L.active){const A=L.active;A.intensity=v;
+      if(v>=8&&!A.stretched){const el=Date.now()-A.start;A.durMin=Math.max(A.durMin,25,Math.ceil(el/60000)+10);A.stretched=true;tick();toast(`Strong urges take longer. Timer stretched to ${A.durMin} minutes.`);}
+      saveLocal();}}
 });
 LY.addEventListener('click',async e=>{
   const t=e.target.closest('[data-f]');if(!t||!flow)return;const f=t.dataset.f,A=L.active;
@@ -1036,7 +1050,8 @@ LY.addEventListener('click',async e=>{
   else if(f==='tool'){flow.tool=t.dataset.v;LY.querySelectorAll('[data-f="tool"]').forEach(c=>c.setAttribute('aria-pressed',c===t));$('#tool').innerHTML=toolHTML();}
   else if(f==='groundNext'){flow.ground++;vibrate(15);$('#tool').innerHTML=toolHTML();}
   else if(f==='groundReset'){flow.ground=0;$('#tool').innerHTML=toolHTML();}
-  else if(f==='more'){A.durMin=Math.ceil((Date.now()-A.start)/60000)+5;saveLocal();flow.step='ride';drawFlow();}
+  else if(f==='more'){A.durMin=Math.ceil((Date.now()-A.start)/60000)+(A.intensity>=8?10:5);A.phase=0;saveLocal();flow.step='ride';drawFlow();}
+  else if(f==='plus5'){A.durMin+=5;saveLocal();vibrate(20);tick();toast('5 more minutes added');}
   else if(f==='passed'){vibrate(30);finishUrge('rode');}
   else if(f==='slipped'){if(await ask('Log this as a slip?','Your day count will restart. Your wins stay.','Log it'))finishUrge('slipped');}
   else if(f==='finish'){const n=($('#fnote')||{}).value;const en=D.entries.find(x=>x.id===flow.result);if(en&&n&&n.trim()){en.note=n.trim();en.u=Date.now();save();}closeFlow();}
